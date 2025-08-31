@@ -1,0 +1,41 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.card {
+    border: none;
+    border-radius: 1rem;
+}
+
+.insumo-item {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.insumo-nome {
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Estilo para o resultado do cálculo */
+.insumo-item [data-campo="sobrou"] {
+    color: #28a745;
+    font-size: 1.5rem;
+}
+
+/* Estilo para a posição final */
+.insumo-item [data-campo="posicaoFinal"] {
+    color: #007bff;
+    font-size: 1.5rem;
+}
+
+/* Estilo para os botões de navegação */
+.btn-lg i {
+    font-size: 1.25rem;
+}
