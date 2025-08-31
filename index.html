@@ -3,37 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contagem de Insumos</title>
+    <title>Gerenciar Insumos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="bg-light">
 
     <div class="container my-5">
-        <h1 class="text-center mb-4">Contagem de Insumos</h1>
+        <h1 class="text-center mb-4">Gerenciar Insumos</h1>
 
         <div class="card p-4 shadow-sm mb-4">
-            <h2 class="card-title text-center mb-4">Nova Contagem</h2>
-            <form id="formContagem">
-                <div class="mb-3">
-                    <label for="responsavel" class="form-label">Responsável pela Contagem</label>
-                    <input type="text" class="form-control" id="responsavel" required>
-                </div>
-                <div class="mb-3">
-                    <label for="dataContagem" class="form-label">Data da Contagem</label>
-                    <input type="date" class="form-control" id="dataContagem" required>
-                </div>
-
-                <div id="listaInsumos" class="mb-4">
+            <h2 class="card-title text-center mb-4">Adicionar/Editar Insumo</h2>
+            <form id="formInsumo">
+                <input type="hidden" id="insumoId">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="insumoNome" class="form-label">Nome do Insumo</label>
+                        <input type="text" class="form-control" id="insumoNome" required>
                     </div>
-
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-success btn-lg">
-                        <i class="bi bi-save me-2"></i>Salvar e Gerar Relatório
+                    <div class="col-md-6">
+                        <label for="insumoUnidade" class="form-label">Unidade (Ex: porção, peça)</label>
+                        <select class="form-select" id="insumoUnidade" required>
+                            <option value="">Selecione a unidade</option>
+                            <option value="porção/porções">porção/porções</option>
+                            <option value="balde">balde</option>
+                            <option value="pote">pote</option>
+                            <option value="unidade">unidade</option>
+                            <option value="peça">peça</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-circle me-2"></i>Salvar Insumo
+                    </button>
+                    <button type="button" class="btn btn-secondary mt-2" id="btnCancelarEdicao" style="display:none;">
+                        Cancelar
                     </button>
                 </div>
+            </form>
+        </div>
+
+        <div class="card p-4 shadow-sm">
+            <h2 class="card-title text-center mb-4">Lista de Insumos</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Unidade</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaInsumos">
+                        </tbody>
+                </table>
+            </div>
+            <p id="semInsumos" class="text-center text-muted mt-3" style="display: none;">
+                Nenhum insumo cadastrado.
+            </p>
+        </div>
+        
+        <div class="d-grid mt-4">
+            <button id="btnResetar" class="btn btn-danger btn-lg">
+                <i class="bi bi-arrow-clockwise me-2"></i>Resetar Sistema
+            </button>
+        </div>
+
+        <div class="d-grid mt-4">
+            <a href="index.html" class="btn btn-success btn-lg">
+                <i class="bi bi-house me-2"></i>Voltar para a Contagem
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
             </form>
         </div>
         
