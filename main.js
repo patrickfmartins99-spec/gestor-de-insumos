@@ -1,3 +1,4 @@
+// Correção de inicialização
 document.addEventListener('DOMContentLoaded', () => {
 
     // Funções para gerenciar o localStorage
