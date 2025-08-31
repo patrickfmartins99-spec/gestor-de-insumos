@@ -550,8 +550,4 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnGerenciar) btnGerenciar.addEventListener('click', () => window.location.href = 'gerenciar.html');
     if (btnEntrada) btnEntrada.addEventListener('click', () => window.location.href = 'entrada.html');
     if (btnHistorico) btnHistorico.addEventListener('click', () => window.location.href = 'historico.html');
-
-    // Inicialização da aplicação
-    inicializarInsumos();
 });
-}
