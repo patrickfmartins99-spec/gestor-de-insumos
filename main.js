@@ -550,7 +550,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 insumoDiv.classList.add('insumo-item', 'border', 'p-3', 'rounded', 'mb-3');
                 insumoDiv.dataset.id = insumo.id;
                 
-                // Pré-preenche o campo "Estoque" com o valor de "sobrou" da última contagem
                 const ultimoSobrou = ultimaContagem?.detalhesContagem?.[insumo.id]?.sobrou || 0;
                 const ultimaPosicaoFinal = ultimaContagem?.detalhesContagem?.[insumo.id]?.posicaoFinal || 0;
 
@@ -648,7 +647,6 @@ document.addEventListener('DOMContentLoaded', () => {
             renderizarInsumosContagem();
         });
 
-        // Evento para o botão de download do relatório de estoque atual
         const btnDownloadEstoque = document.getElementById('btnDownloadEstoque');
         if (btnDownloadEstoque) {
             btnDownloadEstoque.addEventListener('click', gerarRelatorioEstoqueAtual);
