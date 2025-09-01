@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${dados.estoque}</td>
                     <td>${dados.desceu}</td>
                     <td>${dados.linhaMontagem}</td>
+                    <td>${dados.sobrou}</td>
                     <td>${dados.posicaoFinal}</td>
                 </tr>
             `;
@@ -156,8 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const insumos = getInsumos();
         const dataAtual = new Date().toLocaleDateString('pt-BR');
 
-        if (!ultimaContagem || Object.keys(ultimaContagem.detalhesContagem).length === 0) {
-            alert('Não há contagem salva para gerar o relatório de estoque.');
+        if (!insumos || insumos.length === 0) {
+            alert('Nenhum insumo cadastrado para gerar o relatório de estoque. Por favor, adicione insumos na seção "Gerenciar Insumos".');
             return;
         }
 
@@ -173,13 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <tbody>
         `;
         
-        Object.keys(ultimaContagem.detalhesContagem).forEach(insumoId => {
-            const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
-            const sobrou = ultimaContagem.detalhesContagem[insumoId]?.sobrou || 0;
+        insumos.forEach(insumo => {
+            const sobrou = ultimaContagem?.detalhesContagem?.[insumo.id]?.sobrou || 0;
             tabelaHTML += `
                 <tr>
-                    <td>${insumoInfo.nome}</td>
-                    <td>${insumoInfo.unidade}</td>
+                    <td>${insumo.nome}</td>
+                    <td>${insumo.unidade}</td>
                     <td>${sobrou}</td>
                 </tr>
             `;
@@ -536,7 +536,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const formContagem = document.getElementById('formContagem');
     if (formContagem) {
         const listaInsumosDiv = document.getElementById('listaInsumos');
-        const btnVerEstoque = document.getElementById('btnVerEstoque');
 
         const renderizarInsumosContagem = () => {
             const insumos = getInsumos();
@@ -553,10 +552,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Pré-preenche o campo "Estoque" com o valor de "sobrou" da última contagem
                 const ultimoSobrou = ultimaContagem?.detalhesContagem?.[insumo.id]?.sobrou || 0;
+                const ultimaPosicaoFinal = ultimaContagem?.detalhesContagem?.[insumo.id]?.posicaoFinal || 0;
 
                 insumoDiv.innerHTML = `
                     <h5 class="insumo-nome">${insumo.nome} <span class="badge bg-primary ms-2">${insumo.unidade}</span></h5>
-                    <p class="text-muted small mb-2">Última Posição Final: <span class="fw-bold">${ultimaContagem?.detalhesContagem?.[insumo.id]?.posicaoFinal || 0}</span></p>
+                    <p class="text-muted small mb-2">Última Posição Final: <span class="fw-bold">${ultimaPosicaoFinal}</span></p>
                     <div class="row g-2 align-items-end">
                         <div class="col-6 col-md-3">
                             <label class="form-label">Estoque</label>
@@ -586,7 +586,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const inputs = insumoDiv.querySelectorAll('input[type="number"]');
                 inputs.forEach(input => {
                     input.addEventListener('input', () => calcularValoresInsumo(insumoDiv));
-                    // Dispara o cálculo inicial para preencher os valores
                     calcularValoresInsumo(insumoDiv);
                 });
             });
@@ -648,11 +647,8 @@ document.addEventListener('DOMContentLoaded', () => {
             formContagem.reset();
             renderizarInsumosContagem();
         });
-        
-        btnVerEstoque.addEventListener('click', () => {
-            window.location.href = 'estoque.html';
-        });
 
+        // Evento para o botão de download do relatório de estoque atual
         const btnDownloadEstoque = document.getElementById('btnDownloadEstoque');
         if (btnDownloadEstoque) {
             btnDownloadEstoque.addEventListener('click', gerarRelatorioEstoqueAtual);
