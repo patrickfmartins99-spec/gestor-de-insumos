@@ -36,24 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('historicoContagens', JSON.stringify(novoHistorico));
     };
 
-    // --- FUNÇÕES DE ENTRADA (NOVO) ---
-    const getHistoricoEntradas = () => {
-        const historico = localStorage.getItem('historicoEntradas');
-        return historico ? JSON.parse(historico) : [];
-    };
-
-    const saveHistoricoEntradas = (entrada) => {
-        const historico = getHistoricoEntradas();
-        historico.push(entrada);
-        localStorage.setItem('historicoEntradas', JSON.stringify(historico));
-    };
-
-    const deleteEntrada = (id) => {
-        let historico = getHistoricoEntradas();
-        const novoHistorico = historico.filter(entrada => entrada.id !== id);
-        localStorage.setItem('historicoEntradas', JSON.stringify(novoHistorico));
-    };
-
     // --- FUNÇÃO PARA INICIALIZAR INSUMOS ---
     const inicializarInsumos = () => {
         const insumosExistentes = getInsumos();
@@ -189,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tr>
                         <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">INSUMO</th>
                         <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">UNIDADE</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">POSIÇÃO FINAL</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">ESTOQUE ATUAL</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -197,12 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         Object.keys(ultimaContagem.detalhesContagem).forEach(insumoId => {
             const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
-            const posicaoFinal = ultimaContagem.detalhesContagem[insumoId]?.posicaoFinal || 0;
+            const sobrou = ultimaContagem.detalhesContagem[insumoId]?.sobrou || 0;
             tabelaHTML += `
                 <tr>
                     <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${insumoInfo.nome}</td>
                     <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${insumoInfo.unidade}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${posicaoFinal}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${sobrou}</td>
                 </tr>
             `;
         });
@@ -255,13 +237,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             Object.keys(ultimaContagem.detalhesContagem).forEach(insumoId => {
                 const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
-                const posicaoFinal = ultimaContagem.detalhesContagem[insumoId]?.posicaoFinal || 0;
+                const sobrou = ultimaContagem.detalhesContagem[insumoId]?.sobrou || 0;
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${insumoInfo.nome}</td>
                     <td><span class="badge bg-primary">${insumoInfo.unidade}</span></td>
-                    <td class="text-end fw-bold">${posicaoFinal}</td>
+                    <td class="text-end fw-bold">${sobrou}</td>
                 `;
                 tabelaEstoqueBody.appendChild(tr);
             });
@@ -329,8 +311,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const tabelaInsumosBody = document.getElementById('tabelaInsumos');
         const semInsumosText = document.getElementById('semInsumos');
         const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
-        const btnResetar = document.getElementById('btnResetar');
-
 
         const renderizarTabelaInsumos = () => {
             const insumos = getInsumos();
@@ -406,15 +386,6 @@ document.addEventListener('DOMContentLoaded', () => {
             insumoIdInput.value = '';
             btnCancelarEdicao.style.display = 'none';
         };
-        
-        btnResetar.addEventListener('click', () => {
-            if (confirm('Tem certeza que deseja resetar todo o sistema? Todos os dados serão perdidos.')) {
-                localStorage.clear();
-                inicializarInsumos();
-                alert('Sistema resetado com sucesso!');
-                window.location.reload(); // Recarrega a página para refletir as mudanças
-            }
-        });
 
         formInsumo.addEventListener('submit', salvarInsumo);
         btnCancelarEdicao.addEventListener('click', cancelarEdicao);
