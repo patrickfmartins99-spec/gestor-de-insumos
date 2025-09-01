@@ -81,66 +81,48 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Funções Auxiliares para Geração de Relatórios ---
-        const gerarRelatorioPDF = (contagem, filenamePrefix) => {
-        const relatorioContainer = document.getElementById('relatorio-pdf');
-        if (!relatorioContainer) {
-            console.error("Container do relatório não encontrado.");
-            return;
-        }
-
-        const dadosContagemDiv = document.getElementById('dados-contagem');
-        const tabelaRelatorioDiv = document.getElementById('tabela-relatorio');
-
-        if (!dadosContagemDiv || !tabelaRelatorioDiv) {
-            console.error("Elementos de relatório não encontrados.");
-            return;
-        }
-
+    const gerarRelatorioPDF = (contagem, filenamePrefix) => {
         const insumos = getInsumos();
 
-        dadosContagemDiv.innerHTML = `
-            <h1 class="text-center mb-4">Relatório de Contagem</h1>
-            <p><strong>Responsável:</strong> ${contagem.responsavel}</p>
-            <p><strong>Data:</strong> ${contagem.data}</p>
+        let conteudoRelatorio = `
+            <div style="font-family: Arial, sans-serif; padding: 2rem;">
+                <h1 style="text-align: center;">Relatório de Contagem</h1>
+                <p><strong>Responsável:</strong> ${contagem.responsavel}</p>
+                <p><strong>Data:</strong> ${contagem.data}</p>
+                <br>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                    <thead style="background-color: #343a40; color: white;">
+                        <tr>
+                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Insumo</th>
+                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Unidade</th>
+                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Estoque</th>
+                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Desceu</th>
+                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Linha Montagem</th>
+                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Sobrou</th>
+                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Posição Final</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${Object.keys(contagem.detalhesContagem).map(insumoId => {
+                            const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
+                            const dados = contagem.detalhesContagem[insumoId];
+                            return `
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.nome}</td>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.unidade}</td>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.estoque}</td>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.desceu}</td>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.linhaMontagem}</td>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.sobrou}</td>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.posicaoFinal}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
         `;
 
-        tabelaRelatorioDiv.innerHTML = `
-            <table class="table table-striped table-bordered mt-4">
-                <thead class="bg-dark text-white">
-                    <tr>
-                        <th>Insumo</th>
-                        <th>Unidade</th>
-                        <th>Estoque</th>
-                        <th>Desceu</th>
-                        <th>Linha Montagem</th>
-                        <th>Sobrou</th>
-                        <th>Posição Final</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${Object.keys(contagem.detalhesContagem).map(insumoId => {
-                        const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
-                        const dados = contagem.detalhesContagem[insumoId];
-                        return `
-                            <tr>
-                                <td>${insumoInfo.nome}</td>
-                                <td>${insumoInfo.unidade}</td>
-                                <td>${dados.estoque}</td>
-                                <td>${dados.desceu}</td>
-                                <td>${dados.linhaMontagem}</td>
-                                <td>${dados.sobrou}</td>
-                                <td>${dados.posicaoFinal}</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        `;
-        
-        // Garante que o container esteja visível antes de gerar o PDF
-        relatorioContainer.classList.remove('d-none');
-
-        // Configurações para o PDF
         const options = {
             margin: 1,
             filename: `${filenamePrefix}_${contagem.data}.pdf`,
@@ -149,35 +131,10 @@ document.addEventListener('DOMContentLoaded', () => {
             jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
 
-        // Gera o PDF e depois esconde o container novamente
-        html2pdf().set(options).from(relatorioContainer).save().then(() => {
-            relatorioContainer.classList.add('d-none');
-        });
-    };
-
-        // Agora sim, a mágica acontece. A gente remove a classe d-none para que o elemento seja renderizado
-        relatorioContainer.classList.remove('d-none');
-        
-        // Configurações para o PDF
-        const options = {
-            margin: 1,
-            filename: `${filenamePrefix}_${contagem.data}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-
-        // Gera e baixa o PDF
-        html2pdf().set(options).from(relatorioContainer).save().then(() => {
-            // Depois que o PDF for gerado, a gente esconde o container novamente
-            relatorioContainer.classList.add('d-none');
-        });
+        html2pdf().set(options).from(conteudoRelatorio).save();
     };
 
     const gerarRelatorioEstoqueAtual = () => {
-        const relatorioContainer = document.getElementById('relatorio-pdf');
-        const dadosContagemDiv = document.getElementById('dados-contagem');
-        const tabelaRelatorioDiv = document.getElementById('tabela-relatorio');
         const ultimaContagem = getUltimaContagem();
         const insumos = getInsumos();
         const dataAtual = new Date().toISOString().split('T')[0];
@@ -187,36 +144,35 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        dadosContagemDiv.innerHTML = `
-            <h3 class="text-center">Relatório de Posição Atual do Estoque</h3>
-            <p><strong>Data da Análise:</strong> ${dataAtual}</p>
+        let conteudoRelatorio = `
+            <div style="font-family: Arial, sans-serif; padding: 2rem;">
+                <h3 style="text-align: center;">Relatório de Posição Atual do Estoque</h3>
+                <p><strong>Data da Análise:</strong> ${dataAtual}</p>
+                <br>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                    <thead style="background-color: #343a40; color: white;">
+                        <tr>
+                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Insumo</th>
+                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Unidade</th>
+                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Posição Final</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${Object.keys(ultimaContagem.detalhesContagem).map(insumoId => {
+                            const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
+                            const posicaoFinal = ultimaContagem.detalhesContagem[insumoId]?.posicaoFinal || 0;
+                            return `
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.nome}</td>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.unidade}</td>
+                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${posicaoFinal}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
         `;
-        tabelaRelatorioDiv.innerHTML = `
-            <table class="table table-striped table-bordered mt-4">
-                <thead class="bg-dark text-white">
-                    <tr>
-                        <th>Insumo</th>
-                        <th>Unidade</th>
-                        <th>Posição Final</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${Object.keys(ultimaContagem.detalhesContagem).map(insumoId => {
-                        const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
-                        const posicaoFinal = ultimaContagem.detalhesContagem[insumoId]?.posicaoFinal || 0;
-                        return `
-                            <tr>
-                                <td>${insumoInfo.nome}</td>
-                                <td>${insumoInfo.unidade}</td>
-                                <td>${posicaoFinal}</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        `;
-        
-        relatorioContainer.classList.remove('d-none');
 
         const options = {
             margin: 1,
@@ -226,68 +182,41 @@ document.addEventListener('DOMContentLoaded', () => {
             jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
 
-        html2pdf().set(options).from(relatorioContainer).save().then(() => {
-            relatorioContainer.classList.add('d-none');
-        });
+        html2pdf().set(options).from(conteudoRelatorio).save();
     };
 
     // --- Lógica para a tela de Estoque (estoque.html) ---
-        const gerarRelatorioEstoqueAtual = () => {
-        const relatorioContainer = document.getElementById('relatorio-pdf');
-        const dadosContagemDiv = document.getElementById('dados-contagem');
-        const tabelaRelatorioDiv = document.getElementById('tabela-relatorio');
-        const ultimaContagem = getUltimaContagem();
-        const insumos = getInsumos();
-        const dataAtual = new Date().toISOString().split('T')[0];
+    const tabelaEstoqueBody = document.getElementById('tabelaEstoque');
+    if (tabelaEstoqueBody) {
+        const semEstoqueText = document.getElementById('semEstoque');
 
-        if (!ultimaContagem || Object.keys(ultimaContagem.detalhesContagem).length === 0) {
-            alert('Não há contagem salva para gerar o relatório de estoque.');
-            return;
-        }
+        const renderizarEstoque = () => {
+            const ultimaContagem = getUltimaContagem();
+            const insumos = getInsumos();
+            tabelaEstoqueBody.innerHTML = '';
 
-        dadosContagemDiv.innerHTML = `
-            <h3 class="text-center">Relatório de Posição Atual do Estoque</h3>
-            <p><strong>Data da Análise:</strong> ${dataAtual}</p>
-        `;
-        tabelaRelatorioDiv.innerHTML = `
-            <table class="table table-striped table-bordered mt-4">
-                <thead class="bg-dark text-white">
-                    <tr>
-                        <th>Insumo</th>
-                        <th>Unidade</th>
-                        <th>Posição Final</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${Object.keys(ultimaContagem.detalhesContagem).map(insumoId => {
-                        const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
-                        const posicaoFinal = ultimaContagem.detalhesContagem[insumoId]?.posicaoFinal || 0;
-                        return `
-                            <tr>
-                                <td>${insumoInfo.nome}</td>
-                                <td>${insumoInfo.unidade}</td>
-                                <td>${posicaoFinal}</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        `;
-        
-        relatorioContainer.classList.remove('d-none');
+            if (!ultimaContagem || Object.keys(ultimaContagem.detalhesContagem).length === 0) {
+                semEstoqueText.style.display = 'block';
+                return;
+            }
+            semEstoqueText.style.display = 'none';
 
-        const options = {
-            margin: 1,
-            filename: `Relatorio_Estoque_Atual_${dataAtual}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            Object.keys(ultimaContagem.detalhesContagem).forEach(insumoId => {
+                const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
+                const posicaoFinal = ultimaContagem.detalhesContagem[insumoId]?.posicaoFinal || 0;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${insumoInfo.nome}</td>
+                    <td><span class="badge bg-primary">${insumoInfo.unidade}</span></td>
+                    <td class="text-end fw-bold">${posicaoFinal}</td>
+                `;
+                tabelaEstoqueBody.appendChild(tr);
+            });
         };
 
-        html2pdf().set(options).from(relatorioContainer).save().then(() => {
-            relatorioContainer.classList.add('d-none');
-        });
-    };
+        renderizarEstoque();
+    }
 
     // --- Lógica para a tela de Histórico (historico.html) ---
     const tabelaHistoricoBody = document.getElementById('tabelaHistorico');
@@ -520,95 +449,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="col-6 col-md-3">
                             <label class="form-label">Estoque</label>
                             <input type="number" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${ultimaPosicaoFinal}">
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <label class="form-label">Desceu</label>
-                            <input type="number" class="form-control form-control-sm" data-campo="desceu" placeholder="Qtd. Desceu" value="0">
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <label class="form-label">Linha Montagem</label>
-                            <input type="number" class="form-control form-control-sm" data-campo="linhaMontagem" placeholder="Qtd. Linha" value="0">
-                        </div>
-                        <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
-                            <label class="form-label">Sobrou</label>
-                            <p class="mb-0 fw-bold fs-4 text-success" data-campo="sobrou">0</p>
-                        </div>
-                    </div>
-                    <div class="row g-2 mt-2">
-                        <div class="col-6 col-md-6">
-                            <label class="form-label">Posição Final</label>
-                            <p class="mb-0 fw-bold fs-4 text-primary" data-campo="posicaoFinal">0</p>
-                        </div>
-                    </div>
-                `;
-                listaInsumosDiv.appendChild(insumoDiv);
-                const inputs = insumoDiv.querySelectorAll('input[type="number"]');
-                inputs.forEach(input => {
-                    input.addEventListener('input', () => calcularValoresInsumo(insumoDiv, ultimaPosicaoFinal));
-                });
-            });
-        };
-
-        const calcularValoresInsumo = (insumoDiv, ultimaPosicaoFinal) => {
-            const estoque = parseFloat(insumoDiv.querySelector('[data-campo="estoque"]').value) || 0;
-            const desceu = parseFloat(insumoDiv.querySelector('[data-campo="desceu"]').value) || 0;
-            const linhaMontagem = parseFloat(insumoDiv.querySelector('[data-campo="linhaMontagem"]').value) || 0;
-            const sobrou = estoque - desceu;
-            const posicaoFinal = sobrou + desceu + linhaMontagem;
-            insumoDiv.querySelector('[data-campo="sobrou"]').textContent = sobrou;
-            insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent = posicaoFinal;
-        };
-
-        formContagem.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const responsavel = document.getElementById('responsavel').value;
-            const dataContagem = document.getElementById('dataContagem').value;
-            if (!responsavel || !dataContagem) {
-                alert('Por favor, preencha o nome do responsável e a data da contagem.');
-                return;
-            }
-            const detalhesContagem = {};
-            const insumosNaTela = document.querySelectorAll('.insumo-item');
-            insumosNaTela.forEach(insumoDiv => {
-                const id = insumoDiv.dataset.id;
-                const estoque = parseFloat(insumoDiv.querySelector('[data-campo="estoque"]').value) || 0;
-                const desceu = parseFloat(insumoDiv.querySelector('[data-campo="desceu"]').value) || 0;
-                const linhaMontagem = parseFloat(insumoDiv.querySelector('[data-campo="linhaMontagem"]').value) || 0;
-                const sobrou = parseFloat(insumoDiv.querySelector('[data-campo="sobrou"]').textContent) || 0;
-                const posicaoFinal = parseFloat(insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent) || 0;
-                detalhesContagem[id] = { estoque, desceu, linhaMontagem, sobrou, posicaoFinal };
-            });
-            const novaContagem = {
-                id: `contagem-${Date.now()}`,
-                data: dataContagem,
-                responsavel: responsavel,
-                detalhesContagem
-            };
-            setUltimaContagem(novaContagem);
-            saveHistoricoContagens(novaContagem);
-            gerarRelatorioPDF(novaContagem, 'Relatorio_Contagem');
-            formContagem.reset();
-            renderizarInsumosContagem();
-        });
-        
-        btnVerEstoque.addEventListener('click', () => {
-            window.location.href = 'estoque.html';
-        });
-
-        renderizarInsumosContagem();
-    }
-
-    // --- Lógica de Navegação ---
-    const btnGerenciar = document.getElementById('btnGerenciarInsumos');
-    const btnEntrada = document.getElementById('btnEntradaInsumos');
-    const btnHistorico = document.getElementById('btnHistorico');
-    if (btnGerenciar) btnGerenciar.addEventListener('click', () => window.location.href = 'gerenciar.html');
-    if (btnEntrada) btnEntrada.addEventListener('click', () => window.location.href = 'entrada.html');
-    if (btnHistorico) btnHistorico.addEventListener('click', () => window.location.href = 'historico.html');
-
-    // Inicialização da aplicação
-    inicializarInsumos();
-});
                         </div>
                         <div class="col-6 col-md-3">
                             <label class="form-label">Desceu</label>
