@@ -81,23 +81,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- Funções Auxiliares para Geração de Relatórios (NOVO) ---
+    // --- Funções Auxiliares para Geração de Relatórios ---
     const gerarRelatorioPDF = (contagem, filenamePrefix) => {
         const insumos = getInsumos();
-        const dadosEmpresa = {
-            nome: "La Giovana's Pizzaria",
-            titulo: "Relatório de Insumos"
-        };
         
         let tabelaHTML = `
-            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #dee2e6;">
-                <thead style="background-color: #343a40; color: white;">
+            <table class="relatorio-tabela">
+                <thead>
                     <tr>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">INSUMO</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">QTD. NO ESTOQUE</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">QTD. NA LINHA DE MONTAGEM</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">QTD. EFETIVA NA LINHA DE MONTAGEM</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">POSIÇÃO FINAL DO ESTOQUE</th>
+                        <th>INSUMO</th>
+                        <th>QTD. NO ESTOQUE</th>
+                        <th>QTD. NA LINHA DE MONTAGEM</th>
+                        <th>QTD. EFETIVA NA LINHA DE MONTAGEM</th>
+                        <th>POSIÇÃO FINAL DO ESTOQUE</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,11 +104,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const dados = contagem.detalhesContagem[insumoId];
             tabelaHTML += `
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${insumoInfo.nome}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${dados.estoque}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${dados.desceu}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${dados.linhaMontagem}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${dados.posicaoFinal}</td>
+                    <td>${insumoInfo.nome}</td>
+                    <td>${dados.estoque}</td>
+                    <td>${dados.desceu}</td>
+                    <td>${dados.linhaMontagem}</td>
+                    <td>${dados.posicaoFinal}</td>
                 </tr>
             `;
         });
@@ -126,19 +122,19 @@ document.addEventListener('DOMContentLoaded', () => {
         let horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
         let conteudoRelatorio = `
-            <div style="font-family: Arial, sans-serif; padding: 2rem;">
-                <div style="text-align: center; margin-bottom: 2rem;">
-                    <h1 style="margin: 0; font-size: 24px;">${dadosEmpresa.nome}</h1>
-                    <p style="margin: 5px 0;">${dadosEmpresa.titulo}</p>
-                    <p style="font-size: 12px; margin: 0;">Nº do Registro: ${contagem.id}</p>
-                    <hr style="border: 1px solid #343a40; margin-top: 1rem;">
+            <div class="relatorio-container">
+                <div class="relatorio-cabecalho">
+                    <h1 class="relatorio-titulo">La Giovana's Pizzaria</h1>
+                    <p class="relatorio-subtitulo">Relatório de Insumos</p>
+                    <p class="relatorio-registro">Nº do Registro: ${contagem.id}</p>
+                    <hr class="relatorio-divisoria">
                 </div>
-                <div style="margin-bottom: 1.5rem; font-size: 14px;">
-                    <p style="margin: 0;"><strong>Responsável:</strong> ${contagem.responsavel}</p>
-                    <p style="margin: 0;"><strong>Data da contagem:</strong> ${contagem.data}</p>
+                <div class="relatorio-info">
+                    <p><strong>Responsável:</strong> ${contagem.responsavel}</p>
+                    <p><strong>Data da contagem:</strong> ${contagem.data}</p>
                 </div>
                 ${tabelaHTML}
-                <div style="text-align: center; margin-top: 2rem; font-size: 12px; color: #6c757d;">
+                <div class="relatorio-rodape">
                     Documento gerado em ${dataAtual} às ${horaAtual}.
                 </div>
             </div>
@@ -166,12 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let tabelaHTML = `
-            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #dee2e6;">
-                <thead style="background-color: #343a40; color: white;">
+            <table class="relatorio-tabela">
+                <thead>
                     <tr>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">INSUMO</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">UNIDADE</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">ESTOQUE ATUAL</th>
+                        <th>INSUMO</th>
+                        <th>UNIDADE</th>
+                        <th>ESTOQUE ATUAL</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -182,9 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const sobrou = ultimaContagem.detalhesContagem[insumoId]?.sobrou || 0;
             tabelaHTML += `
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${insumoInfo.nome}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${insumoInfo.unidade}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${sobrou}</td>
+                    <td>${insumoInfo.nome}</td>
+                    <td>${insumoInfo.unidade}</td>
+                    <td>${sobrou}</td>
                 </tr>
             `;
         });
@@ -195,16 +191,19 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         
         let conteudoRelatorio = `
-            <div style="font-family: Arial, sans-serif; padding: 2rem;">
-                <div style="text-align: center; margin-bottom: 2rem;">
-                    <h1 style="margin: 0; font-size: 24px;">La Giovana's Pizzaria</h1>
-                    <p style="margin: 5px 0;">Relatório de Posição Atual do Estoque</p>
-                    <hr style="border: 1px solid #343a40; margin-top: 1rem;">
+            <div class="relatorio-container">
+                <div class="relatorio-cabecalho">
+                    <h1 class="relatorio-titulo">La Giovana's Pizzaria</h1>
+                    <p class="relatorio-subtitulo">Relatório de Posição Atual do Estoque</p>
+                    <hr class="relatorio-divisoria">
                 </div>
-                <div style="margin-bottom: 1.5rem; font-size: 14px;">
-                    <p style="margin: 0;"><strong>Data da Análise:</strong> ${dataAtual}</p>
+                <div class="relatorio-info">
+                    <p><strong>Data da Análise:</strong> ${dataAtual}</p>
                 </div>
                 ${tabelaHTML}
+                <div class="relatorio-rodape">
+                    Documento gerado em ${dataAtual} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}.
+                </div>
             </div>
         `;
 
@@ -217,6 +216,62 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         html2pdf().set(options).from(conteudoRelatorio).save();
+    };
+    
+    // Função para renderizar os detalhes da contagem em um modal
+    const renderizarDetalhesContagem = (contagem) => {
+        const insumos = getInsumos();
+        const modalTitle = document.getElementById('modalContagemLabel');
+        const modalBody = document.getElementById('modalContagemBody');
+    
+        if (!modalTitle || !modalBody) return;
+    
+        modalTitle.textContent = `Detalhes da Contagem de ${contagem.data}`;
+        
+        let detalhesHTML = `
+            <p><strong>Responsável:</strong> ${contagem.responsavel}</p>
+            <p><strong>Data da Contagem:</strong> ${contagem.data}</p>
+            <hr>
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>Insumo</th>
+                            <th>Estoque</th>
+                            <th>Desceu</th>
+                            <th>Linha</th>
+                            <th>Sobrou</th>
+                            <th>Posição Final</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+    
+        Object.keys(contagem.detalhesContagem).forEach(insumoId => {
+            const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
+            const dados = contagem.detalhesContagem[insumoId];
+            detalhesHTML += `
+                <tr>
+                    <td>${insumoInfo.nome}</td>
+                    <td>${dados.estoque}</td>
+                    <td>${dados.desceu}</td>
+                    <td>${dados.linhaMontagem}</td>
+                    <td>${dados.sobrou}</td>
+                    <td>${dados.posicaoFinal}</td>
+                </tr>
+            `;
+        });
+    
+        detalhesHTML += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+    
+        modalBody.innerHTML = detalhesHTML;
+    
+        const modal = new bootstrap.Modal(document.getElementById('modalContagem'));
+        modal.show();
     };
 
     // --- Lógica para a tela de Estoque (estoque.html) ---
@@ -271,11 +326,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${contagem.data}</td>
                     <td>${contagem.responsavel}</td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-danger btn-excluir-historico me-2" data-id="${contagem.id}"><i class="bi bi-trash"></i></button>
-                        <button class="btn btn-sm btn-info btn-baixar-pdf" data-id="${contagem.id}"><i class="bi bi-file-earmark-arrow-down"></i></button>
+                        <button class="btn btn-sm btn-info me-2 btn-visualizar-historico" data-id="${contagem.id}"><i class="bi bi-eye"></i></button>
+                        <button class="btn btn-sm btn-danger me-2 btn-excluir-historico" data-id="${contagem.id}"><i class="bi bi-trash"></i></button>
+                        <button class="btn btn-sm btn-secondary btn-baixar-pdf" data-id="${contagem.id}"><i class="bi bi-file-earmark-arrow-down"></i></button>
                     </td>
                 `;
                 tabelaHistoricoBody.appendChild(tr);
+            });
+            
+            // Adiciona event listeners aos botões
+            document.querySelectorAll('.btn-visualizar-historico').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const contagemId = e.currentTarget.dataset.id;
+                    const contagem = getHistoricoContagens().find(c => c.id === contagemId);
+                    if (contagem) {
+                        renderizarDetalhesContagem(contagem);
+                    }
+                });
             });
 
             document.querySelectorAll('.btn-baixar-pdf').forEach(btn => {
@@ -338,9 +405,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const salvarInsumo = (event) => {
             event.preventDefault();
-            const nome = insumoNomeInput.value;
+            const nome = insumoNomeInput.value.trim();
             const unidade = insumoUnidadeSelect.value;
             const id = insumoIdInput.value;
+            
+            // Validação de campos
+            if (!nome || !unidade) {
+                alert('Por favor, preencha o nome do insumo e selecione a unidade.');
+                return;
+            }
+
             let insumos = getInsumos();
             if (id) {
                 const insumoIndex = insumos.findIndex(insumo => insumo.id === id);
@@ -349,6 +423,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     insumos[insumoIndex].unidade = unidade;
                 }
             } else {
+                // Validação para evitar nomes duplicados
+                if (insumos.some(insumo => insumo.nome.toLowerCase() === nome.toLowerCase())) {
+                    alert('Já existe um insumo com este nome.');
+                    return;
+                }
                 const novoInsumo = {
                     id: `insumo-${Date.now()}`,
                     nome,
@@ -420,33 +499,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             let ultimaContagem = getUltimaContagem();
-
-            if (ultimaContagem && ultimaContagem.detalhesContagem) {
-                const detalhes = ultimaContagem.detalhesContagem[insumoId];
-                if (detalhes) {
-                    detalhes.posicaoFinal = (detalhes.posicaoFinal || 0) + quantidade;
-                    setUltimaContagem(ultimaContagem);
-                }
-            } else {
-                const insumoExistente = getInsumos().find(insumo => insumo.id === insumoId);
-                if (insumoExistente) {
-                    ultimaContagem = {
-                        id: 'entrada-inicial',
-                        data: new Date().toISOString().split('T')[0],
-                        responsavel: 'Sistema',
-                        detalhesContagem: {
-                            [insumoId]: {
-                                estoque: quantidade,
-                                desceu: 0,
-                                linhaMontagem: 0,
-                                sobrou: quantidade,
-                                posicaoFinal: quantidade
-                            }
-                        }
-                    };
-                    setUltimaContagem(ultimaContagem);
-                }
+            
+            if (!ultimaContagem) {
+                ultimaContagem = {
+                    id: 'entrada-inicial',
+                    data: new Date().toISOString().split('T')[0],
+                    responsavel: 'Sistema',
+                    detalhesContagem: {}
+                };
             }
+
+            if (!ultimaContagem.detalhesContagem[insumoId]) {
+                 ultimaContagem.detalhesContagem[insumoId] = {
+                    estoque: 0,
+                    desceu: 0,
+                    linhaMontagem: 0,
+                    sobrou: 0,
+                    posicaoFinal: 0
+                };
+            }
+
+            ultimaContagem.detalhesContagem[insumoId].posicaoFinal += quantidade;
+            ultimaContagem.detalhesContagem[insumoId].sobrou += quantidade;
+            
+            setUltimaContagem(ultimaContagem);
+
             alert('Entrada de insumo registrada com sucesso!');
             formEntrada.reset();
         };
@@ -473,16 +550,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const insumoDiv = document.createElement('div');
                 insumoDiv.classList.add('insumo-item', 'border', 'p-3', 'rounded', 'mb-3');
                 insumoDiv.dataset.id = insumo.id;
-
-                const ultimaPosicaoFinal = ultimaContagem?.detalhesContagem?.[insumo.id]?.posicaoFinal || 0;
+                
+                // Pré-preenche o campo "Estoque" com o valor de "sobrou" da última contagem
+                const ultimoSobrou = ultimaContagem?.detalhesContagem?.[insumo.id]?.sobrou || 0;
 
                 insumoDiv.innerHTML = `
                     <h5 class="insumo-nome">${insumo.nome} <span class="badge bg-primary ms-2">${insumo.unidade}</span></h5>
-                    <p class="text-muted small mb-2">Última Posição Final: <span class="fw-bold">${ultimaPosicaoFinal}</span></p>
+                    <p class="text-muted small mb-2">Última Posição Final: <span class="fw-bold">${ultimaContagem?.detalhesContagem?.[insumo.id]?.posicaoFinal || 0}</span></p>
                     <div class="row g-2 align-items-end">
                         <div class="col-6 col-md-3">
                             <label class="form-label">Estoque</label>
-                            <input type="number" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${ultimaPosicaoFinal}">
+                            <input type="number" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${ultimoSobrou}">
                         </div>
                         <div class="col-6 col-md-3">
                             <label class="form-label">Desceu</label>
@@ -507,31 +585,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 listaInsumosDiv.appendChild(insumoDiv);
                 const inputs = insumoDiv.querySelectorAll('input[type="number"]');
                 inputs.forEach(input => {
-                    input.addEventListener('input', () => calcularValoresInsumo(insumoDiv, ultimaPosicaoFinal));
+                    input.addEventListener('input', () => calcularValoresInsumo(insumoDiv));
+                    // Dispara o cálculo inicial para preencher os valores
+                    calcularValoresInsumo(insumoDiv);
                 });
             });
         };
 
-        const calcularValoresInsumo = (insumoDiv, ultimaPosicaoFinal) => {
+        const calcularValoresInsumo = (insumoDiv) => {
             const estoque = parseFloat(insumoDiv.querySelector('[data-campo="estoque"]').value) || 0;
             const desceu = parseFloat(insumoDiv.querySelector('[data-campo="desceu"]').value) || 0;
             const linhaMontagem = parseFloat(insumoDiv.querySelector('[data-campo="linhaMontagem"]').value) || 0;
-            const sobrou = estoque - desceu;
-            const posicaoFinal = sobrou + desceu + linhaMontagem;
-            insumoDiv.querySelector('[data-campo="sobrou"]').textContent = sobrou;
+
+            const estoqueValido = Math.max(0, estoque);
+            const desceuValido = Math.max(0, desceu);
+            const linhaMontagemValido = Math.max(0, linhaMontagem);
+
+            const sobrou = estoqueValido - desceuValido;
+            const posicaoFinal = sobrou + desceuValido + linhaMontagemValido;
+
+            insumoDiv.querySelector('[data-campo="estoque"]').value = estoqueValido;
+            insumoDiv.querySelector('[data-campo="desceu"]').value = desceuValido;
+            insumoDiv.querySelector('[data-campo="linhaMontagem"]').value = linhaMontagemValido;
+            insumoDiv.querySelector('[data-campo="sobrou"]').textContent = Math.max(0, sobrou);
             insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent = posicaoFinal;
         };
 
         formContagem.addEventListener('submit', (event) => {
             event.preventDefault();
-            const responsavel = document.getElementById('responsavel').value;
+            const responsavel = document.getElementById('responsavel').value.trim();
             const dataContagem = document.getElementById('dataContagem').value;
+
             if (!responsavel || !dataContagem) {
                 alert('Por favor, preencha o nome do responsável e a data da contagem.');
                 return;
             }
+
             const detalhesContagem = {};
             const insumosNaTela = document.querySelectorAll('.insumo-item');
+            
             insumosNaTela.forEach(insumoDiv => {
                 const id = insumoDiv.dataset.id;
                 const estoque = parseFloat(insumoDiv.querySelector('[data-campo="estoque"]').value) || 0;
@@ -539,14 +631,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const linhaMontagem = parseFloat(insumoDiv.querySelector('[data-campo="linhaMontagem"]').value) || 0;
                 const sobrou = parseFloat(insumoDiv.querySelector('[data-campo="sobrou"]').textContent) || 0;
                 const posicaoFinal = parseFloat(insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent) || 0;
+                
                 detalhesContagem[id] = { estoque, desceu, linhaMontagem, sobrou, posicaoFinal };
             });
+
             const novaContagem = {
                 id: `contagem-${Date.now()}`,
                 data: dataContagem,
                 responsavel: responsavel,
                 detalhesContagem
             };
+
             setUltimaContagem(novaContagem);
             saveHistoricoContagens(novaContagem);
             gerarRelatorioPDF(novaContagem, 'Relatorio_Contagem');
@@ -558,16 +653,13 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'estoque.html';
         });
 
+        const btnDownloadEstoque = document.getElementById('btnDownloadEstoque');
+        if (btnDownloadEstoque) {
+            btnDownloadEstoque.addEventListener('click', gerarRelatorioEstoqueAtual);
+        }
+
         renderizarInsumosContagem();
     }
-
-    // --- Lógica de Navegação ---
-    const btnGerenciar = document.getElementById('btnGerenciarInsumos');
-    const btnEntrada = document.getElementById('btnEntradaInsumos');
-    const btnHistorico = document.getElementById('btnHistorico');
-    if (btnGerenciar) btnGerenciar.addEventListener('click', () => window.location.href = 'gerenciar.html');
-    if (btnEntrada) btnEntrada.addEventListener('click', () => window.location.href = 'entrada.html');
-    if (btnHistorico) btnHistorico.addEventListener('click', () => window.location.href = 'historico.html');
 
     // Inicialização da aplicação
     inicializarInsumos();
