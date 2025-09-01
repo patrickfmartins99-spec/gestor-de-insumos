@@ -647,6 +647,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderizarInsumosContagem();
         });
 
+        // Evento para o botão de download do relatório de estoque atual
         const btnDownloadEstoque = document.getElementById('btnDownloadEstoque');
         if (btnDownloadEstoque) {
             btnDownloadEstoque.addEventListener('click', gerarRelatorioEstoqueAtual);
