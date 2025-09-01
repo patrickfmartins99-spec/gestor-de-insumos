@@ -265,6 +265,15 @@ document.addEventListener('DOMContentLoaded', () => {
             btnGerarPdfEstoque.addEventListener('click', gerarRelatorioEstoqueAtual);
         }
 
+        // Adicionar event listeners para os botões de navegação
+        const btnHistorico = document.getElementById('btnHistorico');
+        const btnEntradaInsumos = document.getElementById('btnEntradaInsumos');
+        const btnGerenciarInsumos = document.getElementById('btnGerenciarInsumos');
+        
+        if (btnHistorico) btnHistorico.addEventListener('click', () => window.location.href = 'historico.html');
+        if (btnEntradaInsumos) btnEntradaInsumos.addEventListener('click', () => window.location.href = 'entrada.html');
+        if (btnGerenciarInsumos) btnGerenciarInsumos.addEventListener('click', () => window.location.href = 'gerenciar.html');
+
         renderizarEstoque();
     }
 
@@ -430,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const insumoId = selectInsumo.value;
             const quantidade = parseFloat(quantidadeEntradaInput.value);
 
-            if (!insumoId || isNaN(quantidade) || quantidade <= 0) {
+            if (!insumoId || isNaN(quantitude) || quantidade <= 0) {
                 alert('Por favor, selecione um insumo e digite uma quantidade válida.');
                 return;
             }
