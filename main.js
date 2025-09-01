@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const getUltimaContagem = () => {
         const contagem = localStorage.getItem('ultimaContagem');
-        return contagem ? JSON.parse(contagem) : {};
+        return contagem ? JSON.parse(contagem) : null; // Retorna null se não houver dados
     };
 
     const setUltimaContagem = (contagem) => {
@@ -38,7 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FUNÇÃO PARA INICIALIZAR INSUMOS ---
     const inicializarInsumos = () => {
-        if (getInsumos().length === 0) {
+        const insumosExistentes = getInsumos();
+        if (insumosExistentes.length === 0) {
             const insumosPadrao = [
                 { id: 'insumo-4queijos', nome: '4 queijos', unidade: 'porção' },
                 { id: 'insumo-azeitona', nome: 'Azeitona', unidade: 'balde' },
@@ -440,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 insumoDiv.classList.add('insumo-item', 'border', 'p-3', 'rounded', 'mb-3');
                 insumoDiv.dataset.id = insumo.id;
 
-                const ultimaPosicaoFinal = ultimaContagem.detalhesContagem ? ultimaContagem.detalhesContagem[insumo.id]?.posicaoFinal || 0 : 0;
+                const ultimaPosicaoFinal = ultimaContagem?.detalhesContagem?.[insumo.id]?.posicaoFinal || 0;
 
                 insumoDiv.innerHTML = `
                     <h5 class="insumo-nome">${insumo.nome} <span class="badge bg-primary ms-2">${insumo.unidade}</span></h5>
