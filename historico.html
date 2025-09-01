@@ -11,6 +11,34 @@
 </head>
 <body class="bg-light">
 
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <span class="navbar-brand text-light fw-bold">La Giovana's Pizzaria</span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html"><i class="bi bi-house me-2"></i>Contagem</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="estoque.html"><i class="bi bi-box-seam me-2"></i>Estoque Atual</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="historico.html"><i class="bi bi-clock-history me-2"></i>Histórico</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="entrada.html"><i class="bi bi-truck me-2"></i>Entrada</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="gerenciar.html"><i class="bi bi-gear me-2"></i>Gerenciar</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
     <div class="container my-5">
         <h1 class="text-center mb-4">Histórico de Contagens</h1>
 
@@ -26,7 +54,7 @@
                         </tr>
                     </thead>
                     <tbody id="tabelaHistorico">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
             <p id="semHistorico" class="text-center text-muted mt-3" style="display: none;">
@@ -39,11 +67,21 @@
             <div id="dados-contagem"></div>
             <div id="tabela-relatorio"></div>
         </div>
+    </div>
 
-        <div class="d-grid mt-4">
-            <a href="index.html" class="btn btn-success btn-lg">
-                <i class="bi bi-house me-2"></i>Voltar para a Contagem
-            </a>
+    <div class="modal fade" id="modalContagem" tabindex="-1" aria-labelledby="modalContagemLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalContagemLabel">Detalhes da Contagem</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalContagemBody">
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
         </div>
     </div>
 
