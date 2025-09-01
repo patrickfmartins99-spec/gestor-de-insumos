@@ -39,3 +39,82 @@ body {
 .btn-lg i {
     font-size: 1.25rem;
 }
+
+/* --- Estilos para os PDFs --- */
+.relatorio-container {
+    font-family: Arial, sans-serif;
+    padding: 2rem;
+    color: #333;
+}
+
+.relatorio-cabecalho {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.relatorio-titulo {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+    color: #495057;
+}
+
+.relatorio-subtitulo {
+    margin: 5px 0;
+    font-size: 16px;
+    color: #6c757d;
+}
+
+.relatorio-registro {
+    font-size: 12px;
+    color: #6c757d;
+    margin: 0;
+}
+
+.relatorio-divisoria {
+    border: 0;
+    border-top: 1px solid #dee2e6;
+    margin-top: 1rem;
+}
+
+.relatorio-info {
+    margin-bottom: 1.5rem;
+    font-size: 14px;
+}
+
+.relatorio-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    border: 1px solid #dee2e6;
+}
+
+.relatorio-tabela th, .relatorio-tabela td {
+    padding: 8px;
+    border: 1px solid #dee2e6;
+    text-align: left;
+    font-size: 12px;
+}
+
+.relatorio-tabela thead {
+    background-color: #343a40;
+    color: white;
+}
+
+.relatorio-rodape {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* Estilos para a navegação do topo */
+.navbar-brand {
+    padding-left: 1rem;
+}
+
+@media (max-width: 992px) {
+    .navbar-brand {
+        padding-left: 0;
+    }
+}
