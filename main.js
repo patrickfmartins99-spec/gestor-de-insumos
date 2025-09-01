@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const getUltimaContagem = () => {
         const contagem = localStorage.getItem('ultimaContagem');
-        return contagem ? JSON.parse(contagem) : null; // Retorna null se não houver dados
+        return contagem ? JSON.parse(contagem) : null;
     };
 
     const setUltimaContagem = (contagem) => {
@@ -80,47 +80,58 @@ document.addEventListener('DOMContentLoaded', () => {
             saveInsumos(insumosPadrao);
         }
     };
-
+    
     // --- Funções Auxiliares para Geração de Relatórios ---
     const gerarRelatorioPDF = (contagem, filenamePrefix) => {
         const insumos = getInsumos();
+        
+        let tabelaHTML = `
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #dee2e6;">
+                <thead style="background-color: #343a40; color: white;">
+                    <tr>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Insumo</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Estoque</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Desceu</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Linha Montagem</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Posição Final</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        Object.keys(contagem.detalhesContagem).forEach(insumoId => {
+            const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
+            const dados = contagem.detalhesContagem[insumoId];
+            tabelaHTML += `
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.nome}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.estoque}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.desceu}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.linhaMontagem}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.posicaoFinal}</td>
+                </tr>
+            `;
+        });
+        
+        tabelaHTML += `
+                </tbody>
+            </table>
+        `;
 
         let conteudoRelatorio = `
             <div style="font-family: Arial, sans-serif; padding: 2rem;">
-                <h1 style="text-align: center;">Relatório de Contagem</h1>
-                <p><strong>Responsável:</strong> ${contagem.responsavel}</p>
-                <p><strong>Data:</strong> ${contagem.data}</p>
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h1>La Giovana's Pizzaria</h1>
+                    <p>Relatório de Insumos</p>
+                    <hr style="border: 1px solid #343a40;">
+                </div>
+                <div>
+                    <p><strong>Responsável:</strong> ${contagem.responsavel}</p>
+                    <p><strong>Data da Contagem:</strong> ${contagem.data}</p>
+                    <p><strong>Nº do Registro:</strong> ${contagem.id}</p>
+                </div>
                 <br>
-                <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-                    <thead style="background-color: #343a40; color: white;">
-                        <tr>
-                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Insumo</th>
-                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Unidade</th>
-                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Estoque</th>
-                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Desceu</th>
-                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Linha Montagem</th>
-                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Sobrou</th>
-                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Posição Final</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${Object.keys(contagem.detalhesContagem).map(insumoId => {
-                            const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
-                            const dados = contagem.detalhesContagem[insumoId];
-                            return `
-                                <tr>
-                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.nome}</td>
-                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.unidade}</td>
-                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.estoque}</td>
-                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.desceu}</td>
-                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.linhaMontagem}</td>
-                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.sobrou}</td>
-                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.posicaoFinal}</td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
+                ${tabelaHTML}
             </div>
         `;
 
@@ -145,33 +156,47 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        let tabelaHTML = `
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #dee2e6;">
+                <thead style="background-color: #343a40; color: white;">
+                    <tr>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Insumo</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Unidade</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Posição Final</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        Object.keys(ultimaContagem.detalhesContagem).forEach(insumoId => {
+            const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
+            const posicaoFinal = ultimaContagem.detalhesContagem[insumoId]?.posicaoFinal || 0;
+            tabelaHTML += `
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.nome}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.unidade}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">${posicaoFinal}</td>
+                </tr>
+            `;
+        });
+        
+        tabelaHTML += `
+                </tbody>
+            </table>
+        `;
+
         let conteudoRelatorio = `
             <div style="font-family: Arial, sans-serif; padding: 2rem;">
-                <h3 style="text-align: center;">Relatório de Posição Atual do Estoque</h3>
-                <p><strong>Data da Análise:</strong> ${dataAtual}</p>
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h1>La Giovana's Pizzaria</h1>
+                    <p>Relatório de Posição Atual do Estoque</p>
+                    <hr style="border: 1px solid #343a40;">
+                </div>
+                <div>
+                    <p><strong>Data da Análise:</strong> ${dataAtual}</p>
+                </div>
                 <br>
-                <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-                    <thead style="background-color: #343a40; color: white;">
-                        <tr>
-                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Insumo</th>
-                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Unidade</th>
-                            <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Posição Final</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${Object.keys(ultimaContagem.detalhesContagem).map(insumoId => {
-                            const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
-                            const posicaoFinal = ultimaContagem.detalhesContagem[insumoId]?.posicaoFinal || 0;
-                            return `
-                                <tr>
-                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.nome}</td>
-                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.unidade}</td>
-                                    <td style="padding: 8px; border: 1px solid #dee2e6;">${posicaoFinal}</td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
+                ${tabelaHTML}
             </div>
         `;
 
