@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Funções Auxiliares para Geração de Relatórios ---
-    const gerarRelatorioPDF = (contagem, filenamePrefix) => {
+        const gerarRelatorioPDF = (contagem, filenamePrefix) => {
         const relatorioContainer = document.getElementById('relatorio-pdf');
         if (!relatorioContainer) {
             console.error("Container do relatório não encontrado.");
@@ -136,6 +136,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 </tbody>
             </table>
         `;
+        
+        // Garante que o container esteja visível antes de gerar o PDF
+        relatorioContainer.classList.remove('d-none');
+
+        // Configurações para o PDF
+        const options = {
+            margin: 1,
+            filename: `${filenamePrefix}_${contagem.data}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+
+        // Gera o PDF e depois esconde o container novamente
+        html2pdf().set(options).from(relatorioContainer).save().then(() => {
+            relatorioContainer.classList.add('d-none');
+        });
+    };
 
         // Agora sim, a mágica acontece. A gente remove a classe d-none para que o elemento seja renderizado
         relatorioContainer.classList.remove('d-none');
@@ -214,37 +232,62 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Lógica para a tela de Estoque (estoque.html) ---
-    const tabelaEstoqueBody = document.getElementById('tabelaEstoque');
-    if (tabelaEstoqueBody) {
-        const semEstoqueText = document.getElementById('semEstoque');
+        const gerarRelatorioEstoqueAtual = () => {
+        const relatorioContainer = document.getElementById('relatorio-pdf');
+        const dadosContagemDiv = document.getElementById('dados-contagem');
+        const tabelaRelatorioDiv = document.getElementById('tabela-relatorio');
+        const ultimaContagem = getUltimaContagem();
+        const insumos = getInsumos();
+        const dataAtual = new Date().toISOString().split('T')[0];
 
-        const renderizarEstoque = () => {
-            const ultimaContagem = getUltimaContagem();
-            const insumos = getInsumos();
-            tabelaEstoqueBody.innerHTML = '';
+        if (!ultimaContagem || Object.keys(ultimaContagem.detalhesContagem).length === 0) {
+            alert('Não há contagem salva para gerar o relatório de estoque.');
+            return;
+        }
 
-            if (!ultimaContagem || Object.keys(ultimaContagem.detalhesContagem).length === 0) {
-                semEstoqueText.style.display = 'block';
-                return;
-            }
-            semEstoqueText.style.display = 'none';
+        dadosContagemDiv.innerHTML = `
+            <h3 class="text-center">Relatório de Posição Atual do Estoque</h3>
+            <p><strong>Data da Análise:</strong> ${dataAtual}</p>
+        `;
+        tabelaRelatorioDiv.innerHTML = `
+            <table class="table table-striped table-bordered mt-4">
+                <thead class="bg-dark text-white">
+                    <tr>
+                        <th>Insumo</th>
+                        <th>Unidade</th>
+                        <th>Posição Final</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${Object.keys(ultimaContagem.detalhesContagem).map(insumoId => {
+                        const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
+                        const posicaoFinal = ultimaContagem.detalhesContagem[insumoId]?.posicaoFinal || 0;
+                        return `
+                            <tr>
+                                <td>${insumoInfo.nome}</td>
+                                <td>${insumoInfo.unidade}</td>
+                                <td>${posicaoFinal}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+        
+        relatorioContainer.classList.remove('d-none');
 
-            Object.keys(ultimaContagem.detalhesContagem).forEach(insumoId => {
-                const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
-                const posicaoFinal = ultimaContagem.detalhesContagem[insumoId]?.posicaoFinal || 0;
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${insumoInfo.nome}</td>
-                    <td><span class="badge bg-primary">${insumoInfo.unidade}</span></td>
-                    <td class="text-end fw-bold">${posicaoFinal}</td>
-                `;
-                tabelaEstoqueBody.appendChild(tr);
-            });
+        const options = {
+            margin: 1,
+            filename: `Relatorio_Estoque_Atual_${dataAtual}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
 
-        renderizarEstoque();
-    }
+        html2pdf().set(options).from(relatorioContainer).save().then(() => {
+            relatorioContainer.classList.add('d-none');
+        });
+    };
 
     // --- Lógica para a tela de Histórico (historico.html) ---
     const tabelaHistoricoBody = document.getElementById('tabelaHistorico');
