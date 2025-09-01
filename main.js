@@ -276,6 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Lógica para a tela de Estoque (estoque.html) ---
     const tabelaEstoqueBody = document.getElementById('tabelaEstoque');
+    const btnDownloadEstoque = document.getElementById('btnDownloadEstoque');
+    
     if (tabelaEstoqueBody) {
         const semEstoqueText = document.getElementById('semEstoque');
 
@@ -305,6 +307,10 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         renderizarEstoque();
+    }
+    
+    if (btnDownloadEstoque) {
+        btnDownloadEstoque.addEventListener('click', gerarRelatorioEstoqueAtual);
     }
 
     // --- Lógica para a tela de Histórico (historico.html) ---
@@ -646,12 +652,6 @@ document.addEventListener('DOMContentLoaded', () => {
             formContagem.reset();
             renderizarInsumosContagem();
         });
-
-        // Evento para o botão de download do relatório de estoque atual
-        const btnDownloadEstoque = document.getElementById('btnDownloadEstoque');
-        if (btnDownloadEstoque) {
-            btnDownloadEstoque.addEventListener('click', gerarRelatorioEstoqueAtual);
-        }
 
         renderizarInsumosContagem();
     }
