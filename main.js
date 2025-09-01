@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- Funções Auxiliares para Geração de Relatórios ---
+    // --- Funções Auxiliares para Geração de Relatórios (NOVO) ---
     const gerarRelatorioPDF = (contagem, filenamePrefix) => {
         const insumos = getInsumos();
         const dadosEmpresa = {
@@ -311,8 +311,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const tabelaInsumosBody = document.getElementById('tabelaInsumos');
         const semInsumosText = document.getElementById('semInsumos');
         const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
-        const btnResetar = document.getElementById('btnResetar');
-
 
         const renderizarTabelaInsumos = () => {
             const insumos = getInsumos();
@@ -388,18 +386,6 @@ document.addEventListener('DOMContentLoaded', () => {
             insumoIdInput.value = '';
             btnCancelarEdicao.style.display = 'none';
         };
-        
-        if (btnResetar) {
-            btnResetar.addEventListener('click', () => {
-                if (confirm('Tem certeza que deseja resetar todo o sistema? Todos os dados serão perdidos.')) {
-                    localStorage.clear();
-                    inicializarInsumos();
-                    alert('Sistema resetado com sucesso!');
-                    window.location.reload(); // Recarrega a página para refletir as mudanças
-                }
-            });
-        }
-        
 
         formInsumo.addEventListener('submit', salvarInsumo);
         btnCancelarEdicao.addEventListener('click', cancelarEdicao);
