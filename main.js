@@ -36,6 +36,50 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('historicoContagens', JSON.stringify(novoHistorico));
     };
 
+    // --- FUNÇÃO PARA INICIALIZAR INSUMOS ---
+    const inicializarInsumos = () => {
+        if (getInsumos().length === 0) {
+            const insumosPadrao = [
+                { id: 'insumo-4queijos', nome: '4 queijos', unidade: 'porção' },
+                { id: 'insumo-azeitona', nome: 'Azeitona', unidade: 'balde' },
+                { id: 'insumo-bacon', nome: 'Bacon', unidade: 'porção' },
+                { id: 'insumo-brocolis', nome: 'Brócolis', unidade: 'pote' },
+                { id: 'insumo-calabresa', nome: 'Calabresa', unidade: 'porção' },
+                { id: 'insumo-calabresapicante', nome: 'Calabresa picante', unidade: 'porção' },
+                { id: 'insumo-camarao', nome: 'Camarão', unidade: 'porção' },
+                { id: 'insumo-carnedepanela', nome: 'Carne de panela', unidade: 'porção' },
+                { id: 'insumo-cebola', nome: 'Cebola', unidade: 'balde' },
+                { id: 'insumo-cebolacaramelizada', nome: 'Cebola caramelizada', unidade: 'pote' },
+                { id: 'insumo-chester', nome: 'Chester', unidade: 'porção' },
+                { id: 'insumo-coracao', nome: 'Coração', unidade: 'porção' },
+                { id: 'insumo-costelao', nome: 'Costelão', unidade: 'porção' },
+                { id: 'insumo-doritos', nome: 'Doritos', unidade: 'porção' },
+                { id: 'insumo-frangoaomolho', nome: 'Frango ao molho', unidade: 'porção' },
+                { id: 'insumo-frangoemcubos', nome: 'Frango em cubos', unidade: 'porção' },
+                { id: 'insumo-geleia', nome: 'Geleia de amora', unidade: 'balde' },
+                { id: 'insumo-iscasdecarne', nome: 'Iscas de carne', unidade: 'porção' },
+                { id: 'insumo-macacaramelizada', nome: 'Maçã caramelizada', unidade: 'pote' },
+                { id: 'insumo-molhobarbecue', nome: 'Molho Barbecue', unidade: 'balde' },
+                { id: 'insumo-molhopesto', nome: 'Molho pesto', unidade: 'pote' },
+                { id: 'insumo-molhoalhoeoleo', nome: 'Molho alho e óleo', unidade: 'pote' },
+                { id: 'insumo-molhomaracuja', nome: 'Molho de Maracujá', unidade: 'pote' },
+                { id: 'insumo-molhovermelho', nome: 'Molho vermelho pra Camarão', unidade: 'pote' },
+                { id: 'insumo-ovoemconserva', nome: 'Ovo em conserva', unidade: 'balde' },
+                { id: 'insumo-parmesao', nome: 'Parmesão', unidade: 'unidade' },
+                { id: 'insumo-pepperoni', nome: 'Pepperoni', unidade: 'porção' },
+                { id: 'insumo-presunto', nome: 'Presunto', unidade: 'porção' },
+                { id: 'insumo-queijobrie', nome: 'Queijo brie', unidade: 'porção' },
+                { id: 'insumo-queijogorgonzola', nome: 'Queijo gorgonzola', unidade: 'porção' },
+                { id: 'insumo-salmao', nome: 'Salmão', unidade: 'porção' },
+                { id: 'insumo-strogonoffcarne', nome: 'Strogonoff de carne', unidade: 'porção' },
+                { id: 'insumo-strogonofffrango', nome: 'Strogonoff de frango', unidade: 'porção' },
+                { id: 'insumo-tomate', nome: 'Tomate', unidade: 'pote' },
+                { id: 'insumo-vinagrete', nome: 'Vinagrete', unidade: 'pote' }
+            ];
+            saveInsumos(insumosPadrao);
+        }
+    };
+
     // --- Funções Auxiliares para Geração de Relatórios ---
     const gerarRelatorioPDF = (contagem, filenamePrefix) => {
         const relatorioContainer = document.getElementById('relatorio-pdf');
@@ -93,6 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
             </table>
         `;
 
+        // Agora sim, a mágica acontece. A gente remove a classe d-none para que o elemento seja renderizado
+        relatorioContainer.classList.remove('d-none');
+        
+        // Configurações para o PDF
         const options = {
             margin: 1,
             filename: `${filenamePrefix}_${contagem.data}.pdf`,
@@ -101,7 +149,11 @@ document.addEventListener('DOMContentLoaded', () => {
             jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
 
-        html2pdf().set(options).from(relatorioContainer).save();
+        // Gera e baixa o PDF
+        html2pdf().set(options).from(relatorioContainer).save().then(() => {
+            // Depois que o PDF for gerado, a gente esconde o container novamente
+            relatorioContainer.classList.add('d-none');
+        });
     };
 
     const gerarRelatorioEstoqueAtual = () => {
@@ -145,6 +197,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 </tbody>
             </table>
         `;
+        
+        relatorioContainer.classList.remove('d-none');
 
         const options = {
             margin: 1,
@@ -154,7 +208,9 @@ document.addEventListener('DOMContentLoaded', () => {
             jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
 
-        html2pdf().set(options).from(relatorioContainer).save();
+        html2pdf().set(options).from(relatorioContainer).save().then(() => {
+            relatorioContainer.classList.add('d-none');
+        });
     };
 
     // --- Lógica para a tela de Estoque (estoque.html) ---
@@ -421,6 +477,95 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="col-6 col-md-3">
                             <label class="form-label">Estoque</label>
                             <input type="number" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${ultimaPosicaoFinal}">
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Desceu</label>
+                            <input type="number" class="form-control form-control-sm" data-campo="desceu" placeholder="Qtd. Desceu" value="0">
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Linha Montagem</label>
+                            <input type="number" class="form-control form-control-sm" data-campo="linhaMontagem" placeholder="Qtd. Linha" value="0">
+                        </div>
+                        <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
+                            <label class="form-label">Sobrou</label>
+                            <p class="mb-0 fw-bold fs-4 text-success" data-campo="sobrou">0</p>
+                        </div>
+                    </div>
+                    <div class="row g-2 mt-2">
+                        <div class="col-6 col-md-6">
+                            <label class="form-label">Posição Final</label>
+                            <p class="mb-0 fw-bold fs-4 text-primary" data-campo="posicaoFinal">0</p>
+                        </div>
+                    </div>
+                `;
+                listaInsumosDiv.appendChild(insumoDiv);
+                const inputs = insumoDiv.querySelectorAll('input[type="number"]');
+                inputs.forEach(input => {
+                    input.addEventListener('input', () => calcularValoresInsumo(insumoDiv, ultimaPosicaoFinal));
+                });
+            });
+        };
+
+        const calcularValoresInsumo = (insumoDiv, ultimaPosicaoFinal) => {
+            const estoque = parseFloat(insumoDiv.querySelector('[data-campo="estoque"]').value) || 0;
+            const desceu = parseFloat(insumoDiv.querySelector('[data-campo="desceu"]').value) || 0;
+            const linhaMontagem = parseFloat(insumoDiv.querySelector('[data-campo="linhaMontagem"]').value) || 0;
+            const sobrou = estoque - desceu;
+            const posicaoFinal = sobrou + desceu + linhaMontagem;
+            insumoDiv.querySelector('[data-campo="sobrou"]').textContent = sobrou;
+            insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent = posicaoFinal;
+        };
+
+        formContagem.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const responsavel = document.getElementById('responsavel').value;
+            const dataContagem = document.getElementById('dataContagem').value;
+            if (!responsavel || !dataContagem) {
+                alert('Por favor, preencha o nome do responsável e a data da contagem.');
+                return;
+            }
+            const detalhesContagem = {};
+            const insumosNaTela = document.querySelectorAll('.insumo-item');
+            insumosNaTela.forEach(insumoDiv => {
+                const id = insumoDiv.dataset.id;
+                const estoque = parseFloat(insumoDiv.querySelector('[data-campo="estoque"]').value) || 0;
+                const desceu = parseFloat(insumoDiv.querySelector('[data-campo="desceu"]').value) || 0;
+                const linhaMontagem = parseFloat(insumoDiv.querySelector('[data-campo="linhaMontagem"]').value) || 0;
+                const sobrou = parseFloat(insumoDiv.querySelector('[data-campo="sobrou"]').textContent) || 0;
+                const posicaoFinal = parseFloat(insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent) || 0;
+                detalhesContagem[id] = { estoque, desceu, linhaMontagem, sobrou, posicaoFinal };
+            });
+            const novaContagem = {
+                id: `contagem-${Date.now()}`,
+                data: dataContagem,
+                responsavel: responsavel,
+                detalhesContagem
+            };
+            setUltimaContagem(novaContagem);
+            saveHistoricoContagens(novaContagem);
+            gerarRelatorioPDF(novaContagem, 'Relatorio_Contagem');
+            formContagem.reset();
+            renderizarInsumosContagem();
+        });
+        
+        btnVerEstoque.addEventListener('click', () => {
+            window.location.href = 'estoque.html';
+        });
+
+        renderizarInsumosContagem();
+    }
+
+    // --- Lógica de Navegação ---
+    const btnGerenciar = document.getElementById('btnGerenciarInsumos');
+    const btnEntrada = document.getElementById('btnEntradaInsumos');
+    const btnHistorico = document.getElementById('btnHistorico');
+    if (btnGerenciar) btnGerenciar.addEventListener('click', () => window.location.href = 'gerenciar.html');
+    if (btnEntrada) btnEntrada.addEventListener('click', () => window.location.href = 'entrada.html');
+    if (btnHistorico) btnHistorico.addEventListener('click', () => window.location.href = 'historico.html');
+
+    // Inicialização da aplicação
+    inicializarInsumos();
+});
                         </div>
                         <div class="col-6 col-md-3">
                             <label class="form-label">Desceu</label>
