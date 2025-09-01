@@ -36,6 +36,24 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('historicoContagens', JSON.stringify(novoHistorico));
     };
 
+    // --- FUNÇÕES DE ENTRADA (NOVO) ---
+    const getHistoricoEntradas = () => {
+        const historico = localStorage.getItem('historicoEntradas');
+        return historico ? JSON.parse(historico) : [];
+    };
+
+    const saveHistoricoEntradas = (entrada) => {
+        const historico = getHistoricoEntradas();
+        historico.push(entrada);
+        localStorage.setItem('historicoEntradas', JSON.stringify(historico));
+    };
+
+    const deleteEntrada = (id) => {
+        let historico = getHistoricoEntradas();
+        const novoHistorico = historico.filter(entrada => entrada.id !== id);
+        localStorage.setItem('historicoEntradas', JSON.stringify(novoHistorico));
+    };
+
     // --- FUNÇÃO PARA INICIALIZAR INSUMOS ---
     const inicializarInsumos = () => {
         const insumosExistentes = getInsumos();
@@ -80,20 +98,24 @@ document.addEventListener('DOMContentLoaded', () => {
             saveInsumos(insumosPadrao);
         }
     };
-    
+
     // --- Funções Auxiliares para Geração de Relatórios ---
     const gerarRelatorioPDF = (contagem, filenamePrefix) => {
         const insumos = getInsumos();
+        const dadosEmpresa = {
+            nome: "La Giovana's Pizzaria",
+            titulo: "Relatório de Insumos"
+        };
         
         let tabelaHTML = `
             <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #dee2e6;">
                 <thead style="background-color: #343a40; color: white;">
                     <tr>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Insumo</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Estoque</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Desceu</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Linha Montagem</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Posição Final</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">INSUMO</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">QTD. NO ESTOQUE</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">QTD. NA LINHA DE MONTAGEM</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">QTD. EFETIVA NA LINHA DE MONTAGEM</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">POSIÇÃO FINAL DO ESTOQUE</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -104,11 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const dados = contagem.detalhesContagem[insumoId];
             tabelaHTML += `
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.nome}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.estoque}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.desceu}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.linhaMontagem}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6;">${dados.posicaoFinal}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${insumoInfo.nome}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${dados.estoque}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${dados.desceu}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${dados.linhaMontagem}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${dados.posicaoFinal}</td>
                 </tr>
             `;
         });
@@ -118,20 +140,25 @@ document.addEventListener('DOMContentLoaded', () => {
             </table>
         `;
 
+        let dataAtual = new Date().toLocaleDateString('pt-BR');
+        let horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
         let conteudoRelatorio = `
             <div style="font-family: Arial, sans-serif; padding: 2rem;">
                 <div style="text-align: center; margin-bottom: 2rem;">
-                    <h1>La Giovana's Pizzaria</h1>
-                    <p>Relatório de Insumos</p>
-                    <hr style="border: 1px solid #343a40;">
+                    <h1 style="margin: 0; font-size: 24px;">${dadosEmpresa.nome}</h1>
+                    <p style="margin: 5px 0;">${dadosEmpresa.titulo}</p>
+                    <p style="font-size: 12px; margin: 0;">Nº do Registro: ${contagem.id}</p>
+                    <hr style="border: 1px solid #343a40; margin-top: 1rem;">
                 </div>
-                <div>
-                    <p><strong>Responsável:</strong> ${contagem.responsavel}</p>
-                    <p><strong>Data da Contagem:</strong> ${contagem.data}</p>
-                    <p><strong>Nº do Registro:</strong> ${contagem.id}</p>
+                <div style="margin-bottom: 1.5rem; font-size: 14px;">
+                    <p style="margin: 0;"><strong>Responsável:</strong> ${contagem.responsavel}</p>
+                    <p style="margin: 0;"><strong>Data da contagem:</strong> ${contagem.data}</p>
                 </div>
-                <br>
                 ${tabelaHTML}
+                <div style="text-align: center; margin-top: 2rem; font-size: 12px; color: #6c757d;">
+                    Documento gerado em ${dataAtual} às ${horaAtual}.
+                </div>
             </div>
         `;
 
@@ -149,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gerarRelatorioEstoqueAtual = () => {
         const ultimaContagem = getUltimaContagem();
         const insumos = getInsumos();
-        const dataAtual = new Date().toISOString().split('T')[0];
+        const dataAtual = new Date().toLocaleDateString('pt-BR');
 
         if (!ultimaContagem || Object.keys(ultimaContagem.detalhesContagem).length === 0) {
             alert('Não há contagem salva para gerar o relatório de estoque.');
@@ -160,9 +187,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #dee2e6;">
                 <thead style="background-color: #343a40; color: white;">
                     <tr>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Insumo</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Unidade</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left;">Posição Final</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">INSUMO</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">UNIDADE</th>
+                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">POSIÇÃO FINAL</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -173,9 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const posicaoFinal = ultimaContagem.detalhesContagem[insumoId]?.posicaoFinal || 0;
             tabelaHTML += `
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.nome}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6;">${insumoInfo.unidade}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6;">${posicaoFinal}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${insumoInfo.nome}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${insumoInfo.unidade}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${posicaoFinal}</td>
                 </tr>
             `;
         });
@@ -184,18 +211,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 </tbody>
             </table>
         `;
-
+        
         let conteudoRelatorio = `
             <div style="font-family: Arial, sans-serif; padding: 2rem;">
                 <div style="text-align: center; margin-bottom: 2rem;">
-                    <h1>La Giovana's Pizzaria</h1>
-                    <p>Relatório de Posição Atual do Estoque</p>
-                    <hr style="border: 1px solid #343a40;">
+                    <h1 style="margin: 0; font-size: 24px;">La Giovana's Pizzaria</h1>
+                    <p style="margin: 5px 0;">Relatório de Posição Atual do Estoque</p>
+                    <hr style="border: 1px solid #343a40; margin-top: 1rem;">
                 </div>
-                <div>
-                    <p><strong>Data da Análise:</strong> ${dataAtual}</p>
+                <div style="margin-bottom: 1.5rem; font-size: 14px;">
+                    <p style="margin: 0;"><strong>Data da Análise:</strong> ${dataAtual}</p>
                 </div>
-                <br>
                 ${tabelaHTML}
             </div>
         `;
@@ -303,6 +329,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const tabelaInsumosBody = document.getElementById('tabelaInsumos');
         const semInsumosText = document.getElementById('semInsumos');
         const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
+        const btnResetar = document.getElementById('btnResetar');
+
 
         const renderizarTabelaInsumos = () => {
             const insumos = getInsumos();
@@ -378,6 +406,15 @@ document.addEventListener('DOMContentLoaded', () => {
             insumoIdInput.value = '';
             btnCancelarEdicao.style.display = 'none';
         };
+        
+        btnResetar.addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja resetar todo o sistema? Todos os dados serão perdidos.')) {
+                localStorage.clear();
+                inicializarInsumos();
+                alert('Sistema resetado com sucesso!');
+                window.location.reload(); // Recarrega a página para refletir as mudanças
+            }
+        });
 
         formInsumo.addEventListener('submit', salvarInsumo);
         btnCancelarEdicao.addEventListener('click', cancelarEdicao);
