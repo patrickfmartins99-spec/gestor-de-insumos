@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Funções para gerenciar o localStorage
+    // Centraliza a inicialização dos insumos antes de qualquer lógica de página
+    inicializarInsumos();
+
+    // --- FUNÇÕES DE ARMAZENAMENTO (LOCAL STORAGE) ---
     const getInsumos = () => {
         const insumos = localStorage.getItem('insumos');
         return insumos ? JSON.parse(insumos) : [];
@@ -37,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- FUNÇÃO PARA INICIALIZAR INSUMOS ---
-    const inicializarInsumos = () => {
+    function inicializarInsumos() {
         const insumosExistentes = getInsumos();
         if (insumosExistentes.length === 0) {
             const insumosPadrao = [
@@ -79,9 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
             saveInsumos(insumosPadrao);
         }
-    };
+    }
 
-    // --- Funções Auxiliares para Geração de Relatórios (CORRIGIDAS) ---
+    // --- FUNÇÕES AUXILIARES DE RELATÓRIO ---
     const gerarRelatorioPDF = (contagem, filenamePrefix) => {
         const insumos = getInsumos();
         const dadosEmpresa = {
@@ -91,11 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
             telefone: "(11) 99999-9999"
         };
         
-        // Formatar data e hora
         let dataAtual = new Date().toLocaleDateString('pt-BR');
         let horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         
-        // Criar conteúdo do relatório
         let conteudoRelatorio = `
             <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
                 <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #3498db;">
@@ -124,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tbody>
         `;
         
-        // Adicionar linhas da tabela
         Object.keys(contagem.detalhesContagem).forEach(insumoId => {
             const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
             const dados = contagem.detalhesContagem[insumoId];
@@ -132,16 +132,15 @@ document.addEventListener('DOMContentLoaded', () => {
             conteudoRelatorio += `
                 <tr>
                     <td style="padding: 10px; border: 1px solid #dee2e6;">${insumoInfo.nome}</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center;">${dados.estoque}</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center;">${dados.desceu}</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center;">${dados.linhaMontagem}</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center; color: #28a745;">${dados.sobrou}</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center; color: #007bff; font-weight: bold;">${dados.posicaoFinal}</td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center;">${dados.estoque.toFixed(2)}</td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center;">${dados.desceu.toFixed(2)}</td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center;">${dados.linhaMontagem.toFixed(2)}</td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center; color: #28a745;">${dados.sobrou.toFixed(2)}</td>
+                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center; color: #007bff; font-weight: bold;">${dados.posicaoFinal.toFixed(2)}</td>
                 </tr>
             `;
         });
         
-        // Fechar tabela e adicionar rodapé
         conteudoRelatorio += `
                     </tbody>
                 </table>
@@ -152,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
 
-        // Configurações para o PDF
         const options = {
             margin: 0.5,
             filename: `${filenamePrefix}_${contagem.data}.pdf`,
@@ -161,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
             jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
 
-        // Gerar e salvar o PDF
         html2pdf().set(options).from(conteudoRelatorio).save();
     };
 
@@ -194,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <tr>
                     <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${insumoInfo.nome}</td>
                     <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${insumoInfo.unidade}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${sobrou}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${sobrou.toFixed(2)}</td>
                 </tr>
             `;
         });
@@ -229,11 +226,15 @@ document.addEventListener('DOMContentLoaded', () => {
         html2pdf().set(options).from(conteudoRelatorio).save();
     };
 
-    // --- Lógica para a tela de Estoque (estoque.html) ---
-    const tabelaEstoqueBody = document.getElementById('tabelaEstoque');
-    if (tabelaEstoqueBody) {
-        const semEstoqueText = document.getElementById('semEstoque');
 
+    // --- LÓGICA DE PÁGINAS ---
+    
+    // Lógica para a tela de Estoque (estoque.html)
+    const tabelaEstoqueBody = document.getElementById('tabelaEstoque');
+    const btnGerarPdfEstoque = document.getElementById('btnGerarPdfEstoque');
+    const semEstoqueText = document.getElementById('semEstoque');
+
+    if (tabelaEstoqueBody) {
         const renderizarEstoque = () => {
             const ultimaContagem = getUltimaContagem();
             const insumos = getInsumos();
@@ -253,35 +254,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 tr.innerHTML = `
                     <td>${insumoInfo.nome}</td>
                     <td><span class="badge bg-primary">${insumoInfo.unidade}</span></td>
-                    <td class="text-end fw-bold">${sobrou}</td>
+                    <td class="text-end fw-bold">${sobrou.toFixed(2)}</td>
                 `;
                 tabelaEstoqueBody.appendChild(tr);
             });
         };
 
-        // Adicionar event listener para o botão de gerar PDF do estoque
-        const btnGerarPdfEstoque = document.getElementById('btnGerarPdfEstoque');
         if (btnGerarPdfEstoque) {
             btnGerarPdfEstoque.addEventListener('click', gerarRelatorioEstoqueAtual);
         }
 
-        // Adicionar event listeners para os botões de navegação
-        const btnHistorico = document.getElementById('btnHistorico');
-        const btnEntradaInsumos = document.getElementById('btnEntradaInsumos');
-        const btnGerenciarInsumos = document.getElementById('btnGerenciarInsumos');
-        
-        if (btnHistorico) btnHistorico.addEventListener('click', () => window.location.href = 'historico.html');
-        if (btnEntradaInsumos) btnEntradaInsumos.addEventListener('click', () => window.location.href = 'entrada.html');
-        if (btnGerenciarInsumos) btnGerenciarInsumos.addEventListener('click', () => window.location.href = 'gerenciar.html');
-
         renderizarEstoque();
     }
 
-    // --- Lógica para a tela de Histórico (historico.html) ---
+    // Lógica para a tela de Histórico (historico.html)
     const tabelaHistoricoBody = document.getElementById('tabelaHistorico');
+    const semHistoricoText = document.getElementById('semHistorico');
     if (tabelaHistoricoBody) {
-        const semHistoricoText = document.getElementById('semHistorico');
-
         const renderizarHistorico = () => {
             const historico = getHistoricoContagens().reverse();
             tabelaHistoricoBody.innerHTML = '';
@@ -327,16 +316,16 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarHistorico();
     }
 
-    // --- Lógica para a tela de Gerenciamento (gerenciar.html) ---
+    // Lógica para a tela de Gerenciamento (gerenciar.html)
     const formInsumo = document.getElementById('formInsumo');
-    if (formInsumo) {
-        const insumoIdInput = document.getElementById('insumoId');
-        const insumoNomeInput = document.getElementById('insumoNome');
-        const insumoUnidadeSelect = document.getElementById('insumoUnidade');
-        const tabelaInsumosBody = document.getElementById('tabelaInsumos');
-        const semInsumosText = document.getElementById('semInsumos');
-        const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
+    const insumoIdInput = document.getElementById('insumoId');
+    const insumoNomeInput = document.getElementById('insumoNome');
+    const insumoUnidadeSelect = document.getElementById('insumoUnidade');
+    const tabelaInsumosBody = document.getElementById('tabelaInsumos');
+    const semInsumosText = document.getElementById('semInsumos');
+    const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
 
+    if (formInsumo) {
         const renderizarTabelaInsumos = () => {
             const insumos = getInsumos();
             tabelaInsumosBody.innerHTML = '';
@@ -417,12 +406,12 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarTabelaInsumos();
     }
 
-    // --- Lógica para a tela de Entrada (entrada.html) ---
+    // Lógica para a tela de Entrada (entrada.html)
     const formEntrada = document.getElementById('formEntrada');
-    if (formEntrada) {
-        const selectInsumo = document.getElementById('selectInsumo');
-        const quantidadeEntradaInput = document.getElementById('quantidadeEntrada');
+    const selectInsumo = document.getElementById('selectInsumo');
+    const quantidadeEntradaInput = document.getElementById('quantidadeEntrada');
 
+    if (formEntrada) {
         const renderizarSelectInsumos = () => {
             const insumos = getInsumos();
             selectInsumo.innerHTML = '<option value="">-- Selecione um insumo --</option>';
@@ -439,7 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const insumoId = selectInsumo.value;
             const quantidade = parseFloat(quantidadeEntradaInput.value);
 
-            if (!insumoId || isNaN(quantitude) || quantidade <= 0) {
+            if (!insumoId || isNaN(quantidade) || quantidade <= 0) { // CORREÇÃO: quantitude -> quantidade
                 alert('Por favor, selecione um insumo e digite uma quantidade válida.');
                 return;
             }
@@ -449,7 +438,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (ultimaContagem && ultimaContagem.detalhesContagem) {
                 const detalhes = ultimaContagem.detalhesContagem[insumoId];
                 if (detalhes) {
-                    detalhes.posicaoFinal = (detalhes.posicaoFinal || 0) + quantidade;
+                    detalhes.posicaoFinal = parseFloat(detalhes.posicaoFinal || 0) + quantidade;
+                    detalhes.sobrou = parseFloat(detalhes.sobrou || 0) + quantidade;
                     setUltimaContagem(ultimaContagem);
                 }
             } else {
@@ -480,12 +470,12 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarSelectInsumos();
     }
 
-    // --- Lógica para a tela de Contagem (index.html) ---
+    // Lógica para a tela de Contagem (index.html)
     const formContagem = document.getElementById('formContagem');
-    if (formContagem) {
-        const listaInsumosDiv = document.getElementById('listaInsumos');
-        const btnVerEstoque = document.getElementById('btnVerEstoque');
+    const listaInsumosDiv = document.getElementById('listaInsumos');
+    const btnVerEstoque = document.getElementById('btnVerEstoque');
 
+    if (formContagem) {
         const renderizarInsumosContagem = () => {
             const insumos = getInsumos();
             const ultimaContagem = getUltimaContagem();
@@ -503,33 +493,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 insumoDiv.innerHTML = `
                     <h5 class="insumo-nome">${insumo.nome} <span class="badge bg-primary ms-2">${insumo.unidade}</span></h5>
-                    <p class="text-muted small mb-2">Última Posição Final: <span class="fw-bold">${ultimaPosicaoFinal}</span></p>
+                    <p class="text-muted small mb-2">Última Posição Final: <span class="fw-bold">${ultimaPosicaoFinal.toFixed(2)}</span></p>
                     <div class="row g-2 align-items-end">
                         <div class="col-6 col-md-3">
                             <label class="form-label">Estoque</label>
-                            <input type="number" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${ultimaPosicaoFinal}">
+                            <input type="number" step="0.01" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${ultimaPosicaoFinal.toFixed(2)}">
                         </div>
                         <div class="col-6 col-md-3">
                             <label class="form-label">Desceu</label>
-                            <input type="number" class="form-control form-control-sm" data-campo="desceu" placeholder="Qtd. Desceu" value="0">
+                            <input type="number" step="0.01" class="form-control form-control-sm" data-campo="desceu" placeholder="Qtd. Desceu" value="0">
                         </div>
                         <div class="col-6 col-md-3">
                             <label class="form-label">Linha Montagem</label>
-                            <input type="number" class="form-control form-control-sm" data-campo="linhaMontagem" placeholder="Qtd. Linha" value="0">
+                            <input type="number" step="0.01" class="form-control form-control-sm" data-campo="linhaMontagem" placeholder="Qtd. Linha" value="0">
                         </div>
                         <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
                             <label class="form-label">Sobrou</label>
-                            <p class="mb-0 fw-bold fs-4 text-success" data-campo="sobrou">0</p>
+                            <p class="mb-0 fw-bold fs-4 text-success" data-campo="sobrou">0.00</p>
                         </div>
                     </div>
                     <div class="row g-2 mt-2">
                         <div class="col-6 col-md-6">
                             <label class="form-label">Posição Final</label>
-                            <p class="mb-0 fw-bold fs-4 text-primary" data-campo="posicaoFinal">0</p>
+                            <p class="mb-0 fw-bold fs-4 text-primary" data-campo="posicaoFinal">0.00</p>
                         </div>
                     </div>
                 `;
                 listaInsumosDiv.appendChild(insumoDiv);
+                calcularValoresInsumo(insumoDiv, ultimaPosicaoFinal);
                 const inputs = insumoDiv.querySelectorAll('input[type="number"]');
                 inputs.forEach(input => {
                     input.addEventListener('input', () => calcularValoresInsumo(insumoDiv, ultimaPosicaoFinal));
@@ -537,14 +528,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
-        const calcularValoresInsumo = (insumoDiv, ultimaPosicaoFinal) => {
+        const calcularValoresInsumo = (insumoDiv) => {
             const estoque = parseFloat(insumoDiv.querySelector('[data-campo="estoque"]').value) || 0;
             const desceu = parseFloat(insumoDiv.querySelector('[data-campo="desceu"]').value) || 0;
             const linhaMontagem = parseFloat(insumoDiv.querySelector('[data-campo="linhaMontagem"]').value) || 0;
             const sobrou = estoque - desceu;
             const posicaoFinal = sobrou + desceu + linhaMontagem;
-            insumoDiv.querySelector('[data-campo="sobrou"]').textContent = sobrou;
-            insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent = posicaoFinal;
+            insumoDiv.querySelector('[data-campo="sobrou"]').textContent = sobrou.toFixed(2);
+            insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent = posicaoFinal.toFixed(2);
         };
 
         formContagem.addEventListener('submit', (event) => {
@@ -579,21 +570,13 @@ document.addEventListener('DOMContentLoaded', () => {
             renderizarInsumosContagem();
         });
         
-        btnVerEstoque.addEventListener('click', () => {
-            window.location.href = 'estoque.html';
-        });
-
+        // Ação do botão "Ver Estoque"
+        if (btnVerEstoque) {
+            btnVerEstoque.addEventListener('click', () => {
+                window.location.href = 'estoque.html';
+            });
+        }
+        
         renderizarInsumosContagem();
     }
-
-    // --- Lógica de Navegação ---
-    const btnGerenciar = document.getElementById('btnGerenciarInsumos');
-    const btnEntrada = document.getElementById('btnEntradaInsumos');
-    const btnHistorico = document.getElementById('btnHistorico');
-    if (btnGerenciar) btnGerenciar.addEventListener('click', () => window.location.href = 'gerenciar.html');
-    if (btnEntrada) btnEntrada.addEventListener('click', () => window.location.href = 'entrada.html');
-    if (btnHistorico) btnHistorico.addEventListener('click', () => window.location.href = 'historico.html');
-
-    // Inicialização da aplicação
-    inicializarInsumos();
 });
