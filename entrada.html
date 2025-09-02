@@ -28,7 +28,7 @@
                         <a class="nav-link" href="historico.html"><i class="bi bi-clock-history me-2"></i>Histórico</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="entrada.html"><i class="bi bi-truck me-2"></i>Entrada</a>
+                        <a class="nav-link active" aria-current="page" href="entrada.html"><i class="bi bi-truck me-2"></i>Entrada</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="gerenciar.html"><i class="bi bi-gear me-2"></i>Gerenciar</a>
@@ -60,6 +60,27 @@
                     </button>
                 </div>
             </form>
+        </div>
+
+        <div class="card p-4 shadow-sm mt-5">
+            <h2 class="card-title text-center mb-4">Últimas Entradas</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Insumo</th>
+                            <th>Quantidade</th>
+                            <th>Data</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaHistoricoEntradas">
+                    </tbody>
+                </table>
+            </div>
+            <p id="semEntradasText" class="text-center text-muted mt-3" style="display: none;">
+                Nenhuma entrada de insumo encontrada.
+            </p>
         </div>
     </div>
 
