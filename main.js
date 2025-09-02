@@ -1,8 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Centraliza a inicialização dos insumos antes de qualquer lógica de página
-    inicializarInsumos();
-
     // --- FUNÇÕES DE ARMAZENAMENTO (LOCAL STORAGE) ---
     const getInsumos = () => {
         const insumos = localStorage.getItem('insumos');
@@ -41,10 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FUNÇÃO PARA INICIALIZAR INSUMOS ---
     function inicializarInsumos() {
-        // Verifica se já existem insumos no localStorage
         const insumosExistentes = getInsumos(); 
-
-        // Se a lista de insumos for vazia, adiciona os dados padrão
         if (insumosExistentes.length === 0) {
             const insumosPadrao = [
                 { id: 'insumo-4queijos', nome: '4 queijos', unidade: 'porção' },
@@ -477,7 +471,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Lógica para a tela de Contagem (index.html)
     const formContagem = document.getElementById('formContagem');
     const listaInsumosDiv = document.getElementById('listaInsumos');
-    const btnVerEstoque = document.getElementById('btnVerEstoque');
 
     if (formContagem) {
         const renderizarInsumosContagem = () => {
@@ -576,4 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         renderizarInsumosContagem();
     }
+    
+    // Inicialização principal da aplicação
+    inicializarInsumos();
 });
