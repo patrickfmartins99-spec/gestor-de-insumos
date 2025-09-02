@@ -550,4 +550,147 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (detalhes) {
                     detalhes.posicaoFinal = parseFloat(detalhes.posicaoFinal || 0) + quantidade;
                     detalhes.sobrou = parseFloat(detalhes.sobrou || 0) + quantidade;
-                    setUltimaContagem(ultimaCont
+                    setUltimaContagem(ultimaContagem);
+                }
+            } else {
+                const insumoExistente = getInsumos().find(insumo => insumo.id === insumoId);
+                if (insumoExistente) {
+                    ultimaContagem = {
+                        id: 'entrada-inicial',
+                        data: new Date().toISOString().split('T')[0],
+                        responsavel: 'Sistema',
+                        detalhesContagem: {
+                            [insumoId]: {
+                                estoque: quantidade,
+                                desceu: 0,
+                                linhaMontagem: 0,
+                                sobrou: quantidade,
+                                posicaoFinal: quantidade
+                            }
+                        }
+                    };
+                    setUltimaContagem(ultimaContagem);
+                }
+            }
+            alert('Entrada de insumo registrada com sucesso!');
+            formEntrada.reset();
+            renderizarHistoricoEntradas();
+        };
+
+        formEntrada.addEventListener('submit', registrarEntrada);
+        renderizarSelectInsumos();
+        renderizarHistoricoEntradas();
+    }
+
+    // Lógica para a tela de Contagem (index.html)
+    const formContagem = document.getElementById('formContagem');
+    const listaInsumosDiv = document.getElementById('listaInsumos');
+
+    if (formContagem) {
+        const renderizarInsumosContagem = () => {
+            const insumos = getInsumos();
+            const ultimaContagem = getUltimaContagem();
+            listaInsumosDiv.innerHTML = '';
+            if (insumos.length === 0) {
+                listaInsumosDiv.innerHTML = '<p class="text-center text-muted">Nenhum insumo cadastrado. Vá para "Gerenciar Insumos" para adicionar.</p>';
+                return;
+            }
+            insumos.forEach(insumo => {
+                const insumoDiv = document.createElement('div');
+                insumoDiv.classList.add('insumo-item', 'border', 'p-3', 'rounded', 'mb-3');
+                insumoDiv.dataset.id = insumo.id;
+
+                const ultimaPosicaoFinal = ultimaContagem?.detalhesContagem?.[insumo.id]?.posicaoFinal || 0;
+
+                insumoDiv.innerHTML = `
+                    <h5 class="insumo-nome">${insumo.nome} <span class="badge bg-primary ms-2">${insumo.unidade}</span></h5>
+                    <p class="text-muted small mb-2">Última Posição Final: <span class="fw-bold">${ultimaPosicaoFinal}</span></p>
+                    <div class="row g-2 align-items-end">
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Estoque</label>
+                            <input type="number" step="any" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${ultimaPosicaoFinal}">
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Desceu</label>
+                            <input type="number" step="any" class="form-control form-control-sm" data-campo="desceu" placeholder="Qtd. Desceu" value="0">
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Linha Montagem</label>
+                            <input type="number" step="any" class="form-control form-control-sm" data-campo="linhaMontagem" placeholder="Qtd. Linha" value="0">
+                        </div>
+                        <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
+                            <label class="form-label">Sobrou</label>
+                            <p class="mb-0 fw-bold fs-4 text-success" data-campo="sobrou">0</p>
+                        </div>
+                    </div>
+                    <div class="row g-2 mt-2">
+                        <div class="col-6 col-md-6">
+                            <label class="form-label">Posição Final</label>
+                            <p class="mb-0 fw-bold fs-4 text-primary" data-campo="posicaoFinal">0</p>
+                        </div>
+                    </div>
+                `;
+                listaInsumosDiv.appendChild(insumoDiv);
+                calcularValoresInsumo(insumoDiv);
+                const inputs = insumoDiv.querySelectorAll('input[type="number"]');
+                inputs.forEach(input => {
+                    input.addEventListener('input', () => calcularValoresInsumo(insumoDiv));
+                });
+            });
+        };
+
+        const calcularValoresInsumo = (insumoDiv) => {
+            const estoque = parseFloat(insumoDiv.querySelector('[data-campo="estoque"]').value) || 0;
+            const desceu = parseFloat(insumoDiv.querySelector('[data-campo="desceu"]').value) || 0;
+            const linhaMontagem = parseFloat(insumoDiv.querySelector('[data-campo="linhaMontagem"]').value) || 0;
+            const sobrou = estoque - desceu;
+            const posicaoFinal = sobrou + desceu + linhaMontagem;
+            insumoDiv.querySelector('[data-campo="sobrou"]').textContent = sobrou;
+            insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent = posicaoFinal;
+        };
+
+        formContagem.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const responsavel = document.getElementById('responsavel').value;
+            const dataContagem = document.getElementById('dataContagem').value;
+            if (!responsavel || !dataContagem) {
+                alert('Por favor, preencha o nome do responsável e a data da contagem.');
+                return;
+            }
+            const detalhesContagem = {};
+            const insumosNaTela = document.querySelectorAll('.insumo-item');
+            insumosNaTela.forEach(insumoDiv => {
+                const id = insumoDiv.dataset.id;
+                const estoque = parseFloat(insumoDiv.querySelector('[data-campo="estoque"]').value) || 0;
+                const desceu = parseFloat(insumoDiv.querySelector('[data-campo="desceu"]').value) || 0;
+                const linhaMontagem = parseFloat(insumoDiv.querySelector('[data-campo="linhaMontagem"]').value) || 0;
+                const sobrou = parseFloat(insumoDiv.querySelector('[data-campo="sobrou"]').textContent) || 0;
+                const posicaoFinal = parseFloat(insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent) || 0;
+                detalhesContagem[id] = { estoque, desceu, linhaMontagem, sobrou, posicaoFinal };
+            });
+            const novaContagem = {
+                id: `contagem-${Date.now()}`,
+                data: dataContagem,
+                responsavel: responsavel,
+                detalhesContagem
+            };
+
+            // Verifica se a contagem tem insumos antes de salvar
+            if (Object.keys(detalhesContagem).length === 0) {
+                alert('Nenhum insumo foi contado. Por favor, adicione insumos antes de salvar.');
+                return;
+            }
+
+            setUltimaContagem(novaContagem);
+            saveHistoricoContagens(novaContagem);
+            gerarRelatorioPDF(novaContagem, 'Relatorio_Contagem');
+            formContagem.reset();
+            renderizarInsumosContagem();
+        });
+        
+        renderizarInsumosContagem();
+    }
+    
+    // Inicialização principal da aplicação
+    inicializarInsumos();
+});
