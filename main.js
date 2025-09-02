@@ -47,6 +47,42 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('historicoEntradas', JSON.stringify(historico));
     };
     
+    // Funções para editar/excluir entradas do histórico
+    const deleteHistoricoEntrada = (id) => {
+        let historico = getHistoricoEntradas();
+        const entradaExcluida = historico.find(e => e.id === id);
+        if (!entradaExcluida) return;
+
+        let ultimaContagem = getUltimaContagem();
+        if (ultimaContagem && ultimaContagem.detalhesContagem[entradaExcluida.insumoId]) {
+            ultimaContagem.detalhesContagem[entradaExcluida.insumoId].sobrou -= entradaExcluida.quantidade;
+            ultimaContagem.detalhesContagem[entradaExcluida.insumoId].posicaoFinal -= entradaExcluida.quantidade;
+            setUltimaContagem(ultimaContagem);
+        }
+
+        const novoHistorico = historico.filter(e => e.id !== id);
+        localStorage.setItem('historicoEntradas', JSON.stringify(novoHistorico));
+    };
+
+    const updateHistoricoEntrada = (id, novaQuantidade) => {
+        let historico = getHistoricoEntradas();
+        const entradaParaAtualizar = historico.find(e => e.id === id);
+        if (!entradaParaAtualizar) return;
+
+        const quantidadeAnterior = entradaParaAtualizar.quantidade;
+        const diferenca = novaQuantidade - quantidadeAnterior;
+
+        let ultimaContagem = getUltimaContagem();
+        if (ultimaContagem && ultimaContagem.detalhesContagem[entradaParaAtualizar.insumoId]) {
+            ultimaContagem.detalhesContagem[entradaParaAtualizar.insumoId].sobrou += diferenca;
+            ultimaContagem.detalhesContagem[entradaParaAtualizar.insumoId].posicaoFinal += diferenca;
+            setUltimaContagem(ultimaContagem);
+        }
+
+        entradaParaAtualizar.quantidade = novaQuantidade;
+        localStorage.setItem('historicoEntradas', JSON.stringify(historico));
+    };
+
     // --- FUNÇÃO PARA INICIALIZAR INSUMOS ---
     function inicializarInsumos() {
         const insumosExistentes = getInsumos(); 
@@ -414,6 +450,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const formEntrada = document.getElementById('formEntrada');
     const selectInsumo = document.getElementById('selectInsumo');
     const quantidadeEntradaInput = document.getElementById('quantidadeEntrada');
+    const tabelaHistoricoEntradasBody = document.getElementById('tabelaHistoricoEntradas');
+    const semEntradasText = document.getElementById('semEntradasText');
 
     if (formEntrada) {
         const renderizarSelectInsumos = () => {
@@ -427,6 +465,62 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
+        const renderizarHistoricoEntradas = () => {
+            const historico = getHistoricoEntradas().reverse();
+            const insumos = getInsumos();
+            tabelaHistoricoEntradasBody.innerHTML = '';
+            
+            if (historico.length === 0) {
+                semEntradasText.style.display = 'block';
+                return;
+            }
+            semEntradasText.style.display = 'none';
+
+            historico.forEach(entrada => {
+                const insumoInfo = insumos.find(i => i.id === entrada.insumoId) || { nome: 'Insumo Desconhecido', unidade: '' };
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${insumoInfo.nome}</td>
+                    <td>${entrada.quantidade}</td>
+                    <td>${entrada.data}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-info me-2 btn-editar-entrada" data-id="${entrada.id}"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-danger btn-excluir-entrada" data-id="${entrada.id}"><i class="bi bi-trash"></i></button>
+                    </td>
+                `;
+                tabelaHistoricoEntradasBody.appendChild(tr);
+            });
+
+            document.querySelectorAll('.btn-editar-entrada').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const entradaId = e.currentTarget.dataset.id;
+                    const historico = getHistoricoEntradas();
+                    const entrada = historico.find(e => e.id === entradaId);
+                    if (entrada) {
+                        const novaQuantidade = prompt(`Digite a nova quantidade para ${insumos.find(i => i.id === entrada.insumoId).nome}:`, entrada.quantidade);
+                        if (novaQuantidade !== null && !isNaN(novaQuantidade) && parseFloat(novaQuantidade) > 0) {
+                            updateHistoricoEntrada(entradaId, parseFloat(novaQuantidade));
+                            renderizarHistoricoEntradas();
+                            alert('Entrada atualizada com sucesso!');
+                        } else if (novaQuantidade !== null) {
+                            alert('Quantidade inválida.');
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('.btn-excluir-entrada').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const entradaId = e.currentTarget.dataset.id;
+                    if (confirm('Tem certeza que deseja excluir esta entrada?')) {
+                        deleteHistoricoEntrada(entradaId);
+                        renderizarHistoricoEntradas();
+                        alert('Entrada excluída com sucesso!');
+                    }
+                });
+            });
+        };
+
         const registrarEntrada = (event) => {
             event.preventDefault();
             const insumoId = selectInsumo.value;
@@ -437,18 +531,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Cria um objeto para a nova entrada
             const novaEntrada = {
                 id: `entrada-${Date.now()}`,
                 insumoId: insumoId,
                 quantidade: quantidade,
                 data: new Date().toISOString().split('T')[0]
             };
-
-            // Salva a entrada no novo histórico
             saveHistoricoEntradas(novaEntrada);
-
-            // Atualiza a última contagem com a nova quantidade
+            
             let ultimaContagem = getUltimaContagem();
             if (ultimaContagem && ultimaContagem.detalhesContagem) {
                 const detalhes = ultimaContagem.detalhesContagem[insumoId];
@@ -479,10 +569,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             alert('Entrada de insumo registrada com sucesso!');
             formEntrada.reset();
+            renderizarHistoricoEntradas();
         };
 
         formEntrada.addEventListener('submit', registrarEntrada);
         renderizarSelectInsumos();
+        renderizarHistoricoEntradas();
     }
 
     // Lógica para a tela de Contagem (index.html)
