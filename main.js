@@ -36,6 +36,17 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('historicoContagens', JSON.stringify(novoHistorico));
     };
 
+    const getHistoricoEntradas = () => {
+        const historico = localStorage.getItem('historicoEntradas');
+        return historico ? JSON.parse(historico) : [];
+    };
+
+    const saveHistoricoEntradas = (entrada) => {
+        const historico = getHistoricoEntradas();
+        historico.push(entrada);
+        localStorage.setItem('historicoEntradas', JSON.stringify(historico));
+    };
+    
     // --- FUNÇÃO PARA INICIALIZAR INSUMOS ---
     function inicializarInsumos() {
         const insumosExistentes = getInsumos(); 
@@ -87,37 +98,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const insumos = getInsumos();
         const dadosEmpresa = {
             nome: "La Giovana's Pizzaria",
-            titulo: "Relatório de Contagem de Insumos",
-            endereco: "Rua Exemplo, 123 - Centro",
-            telefone: "(11) 99999-9999"
+            titulo: "Relatório de Contagem de Insumos"
         };
         
         let dataAtual = new Date().toLocaleDateString('pt-BR');
         let horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         
         let conteudoRelatorio = `
-            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #3498db;">
-                    <h1 style="margin: 0; color: #2c3e50; font-size: 24px;">${dadosEmpresa.nome}</h1>
-                    <p style="margin: 5px 0; font-size: 18px; color: #3498db;">${dadosEmpresa.titulo}</p>
-                    <p style="font-size: 14px; margin: 0;">${dadosEmpresa.endereco} - ${dadosEmpresa.telefone}</p>
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #000;">
+                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #000;">
+                    <h1 style="margin: 0; color: #000; font-size: 24px;">${dadosEmpresa.nome}</h1>
+                    <p style="margin: 5px 0; font-size: 18px; color: #000;">${dadosEmpresa.titulo}</p>
                 </div>
                 
-                <div style="margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #000; border-radius: 8px;">
                     <p style="margin: 5px 0; font-size: 16px;"><strong>Responsável:</strong> ${contagem.responsavel}</p>
                     <p style="margin: 5px 0; font-size: 16px;"><strong>Data da contagem:</strong> ${contagem.data}</p>
-                    <p style="margin: 5px 0; font-size: 14px; color: #6c757d;">Nº do Registro: ${contagem.id}</p>
+                    <p style="margin: 5px 0; font-size: 14px; color: #333;">Nº do Registro: ${contagem.id}</p>
                 </div>
                 
                 <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
                     <thead>
-                        <tr style="background-color: #2c3e50; color: white;">
-                            <th style="padding: 12px; border: 1px solid #dee2e6; text-align: left;">INSUMO</th>
-                            <th style="padding: 12px; border: 1px solid #dee2e6; text-align: center;">ESTOQUE</th>
-                            <th style="padding: 12px; border: 1px solid #dee2e6; text-align: center;">DESCEU</th>
-                            <th style="padding: 12px; border: 1px solid #dee2e6; text-align: center;">LINHA</th>
-                            <th style="padding: 12px; border: 1px solid #dee2e6; text-align: center;">SOBROU</th>
-                            <th style="padding: 12px; border: 1px solid #dee2e6; text-align: center;">POSIÇÃO FINAL</th>
+                        <tr style="background-color: #333; color: white;">
+                            <th style="padding: 12px; border: 1px solid #000; text-align: left;">INSUMO</th>
+                            <th style="padding: 12px; border: 1px solid #000; text-align: center;">ESTOQUE</th>
+                            <th style="padding: 12px; border: 1px solid #000; text-align: center;">DESCEU</th>
+                            <th style="padding: 12px; border: 1px solid #000; text-align: center;">LINHA</th>
+                            <th style="padding: 12px; border: 1px solid #000; text-align: center;">SOBROU</th>
+                            <th style="padding: 12px; border: 1px solid #000; text-align: center;">POSIÇÃO FINAL</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -129,12 +137,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             conteudoRelatorio += `
                 <tr>
-                    <td style="padding: 10px; border: 1px solid #dee2e6;">${insumoInfo.nome}</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center;">${dados.estoque.toFixed(2)}</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center;">${dados.desceu.toFixed(2)}</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center;">${dados.linhaMontagem.toFixed(2)}</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center; color: #28a745;">${dados.sobrou.toFixed(2)}</td>
-                    <td style="padding: 10px; border: 1px solid #dee2e6; text-align: center; color: #007bff; font-weight: bold;">${dados.posicaoFinal.toFixed(2)}</td>
+                    <td style="padding: 10px; border: 1px solid #000;">${insumoInfo.nome}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.estoque}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.desceu}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.linhaMontagem}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.sobrou}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center; font-weight: bold; font-size: 16px;">${dados.posicaoFinal}</td>
                 </tr>
             `;
         });
@@ -171,12 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let tabelaHTML = `
-            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #dee2e6;">
-                <thead style="background-color: #343a40; color: white;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #000;">
+                <thead style="background-color: #333; color: white;">
                     <tr>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">INSUMO</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">UNIDADE</th>
-                        <th style="padding: 8px; border: 1px solid #dee2e6; text-align: left; font-size: 12px;">ESTOQUE ATUAL</th>
+                        <th style="padding: 8px; border: 1px solid #000; text-align: left; font-size: 12px;">INSUMO</th>
+                        <th style="padding: 8px; border: 1px solid #000; text-align: left; font-size: 12px;">UNIDADE</th>
+                        <th style="padding: 8px; border: 1px solid #000; text-align: left; font-size: 12px;">ESTOQUE ATUAL</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -187,9 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const sobrou = ultimaContagem.detalhesContagem[insumoId]?.sobrou || 0;
             tabelaHTML += `
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${insumoInfo.nome}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${insumoInfo.unidade}</td>
-                    <td style="padding: 8px; border: 1px solid #dee2e6; font-size: 12px;">${sobrou.toFixed(2)}</td>
+                    <td style="padding: 8px; border: 1px solid #000; font-size: 12px;">${insumoInfo.nome}</td>
+                    <td style="padding: 8px; border: 1px solid #000; font-size: 12px;">${insumoInfo.unidade}</td>
+                    <td style="padding: 8px; border: 1px solid #000; font-size: 12px;">${sobrou}</td>
                 </tr>
             `;
         });
@@ -204,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div style="text-align: center; margin-bottom: 2rem;">
                     <h1 style="margin: 0; font-size: 24px;">La Giovana's Pizzaria</h1>
                     <p style="margin: 5px 0;">Relatório de Posição Atual do Estoque</p>
-                    <hr style="border: 1px solid #343a40; margin-top: 1rem;">
+                    <hr style="border: 1px solid #000; margin-top: 1rem;">
                 </div>
                 <div style="margin-bottom: 1.5rem; font-size: 14px;">
                     <p style="margin: 0;"><strong>Data da Análise:</strong> ${dataAtual}</p>
@@ -232,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnGerarPdfEstoque = document.getElementById('btnGerarPdfEstoque');
     const semEstoqueText = document.getElementById('semEstoque');
 
-    if (tabelaEstoqueBody) {
+    if (tabelaEstoqueBody && btnGerarPdfEstoque) {
         const renderizarEstoque = () => {
             const ultimaContagem = getUltimaContagem();
             const insumos = getInsumos();
@@ -252,15 +260,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 tr.innerHTML = `
                     <td>${insumoInfo.nome}</td>
                     <td><span class="badge bg-primary">${insumoInfo.unidade}</span></td>
-                    <td class="text-end fw-bold">${sobrou.toFixed(2)}</td>
+                    <td class="text-end fw-bold">${sobrou}</td>
                 `;
                 tabelaEstoqueBody.appendChild(tr);
             });
         };
 
-        if (btnGerarPdfEstoque) {
-            btnGerarPdfEstoque.addEventListener('click', gerarRelatorioEstoqueAtual);
-        }
+        btnGerarPdfEstoque.addEventListener('click', gerarRelatorioEstoqueAtual);
 
         renderizarEstoque();
     }
@@ -431,8 +437,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            let ultimaContagem = getUltimaContagem();
+            // Cria um objeto para a nova entrada
+            const novaEntrada = {
+                id: `entrada-${Date.now()}`,
+                insumoId: insumoId,
+                quantidade: quantidade,
+                data: new Date().toISOString().split('T')[0]
+            };
 
+            // Salva a entrada no novo histórico
+            saveHistoricoEntradas(novaEntrada);
+
+            // Atualiza a última contagem com a nova quantidade
+            let ultimaContagem = getUltimaContagem();
             if (ultimaContagem && ultimaContagem.detalhesContagem) {
                 const detalhes = ultimaContagem.detalhesContagem[insumoId];
                 if (detalhes) {
@@ -490,29 +507,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 insumoDiv.innerHTML = `
                     <h5 class="insumo-nome">${insumo.nome} <span class="badge bg-primary ms-2">${insumo.unidade}</span></h5>
-                    <p class="text-muted small mb-2">Última Posição Final: <span class="fw-bold">${ultimaPosicaoFinal.toFixed(2)}</span></p>
+                    <p class="text-muted small mb-2">Última Posição Final: <span class="fw-bold">${ultimaPosicaoFinal}</span></p>
                     <div class="row g-2 align-items-end">
                         <div class="col-6 col-md-3">
                             <label class="form-label">Estoque</label>
-                            <input type="number" step="0.01" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${ultimaPosicaoFinal.toFixed(2)}">
+                            <input type="number" step="any" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${ultimaPosicaoFinal}">
                         </div>
                         <div class="col-6 col-md-3">
                             <label class="form-label">Desceu</label>
-                            <input type="number" step="0.01" class="form-control form-control-sm" data-campo="desceu" placeholder="Qtd. Desceu" value="0">
+                            <input type="number" step="any" class="form-control form-control-sm" data-campo="desceu" placeholder="Qtd. Desceu" value="0">
                         </div>
                         <div class="col-6 col-md-3">
                             <label class="form-label">Linha Montagem</label>
-                            <input type="number" step="0.01" class="form-control form-control-sm" data-campo="linhaMontagem" placeholder="Qtd. Linha" value="0">
+                            <input type="number" step="any" class="form-control form-control-sm" data-campo="linhaMontagem" placeholder="Qtd. Linha" value="0">
                         </div>
                         <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
                             <label class="form-label">Sobrou</label>
-                            <p class="mb-0 fw-bold fs-4 text-success" data-campo="sobrou">0.00</p>
+                            <p class="mb-0 fw-bold fs-4 text-success" data-campo="sobrou">0</p>
                         </div>
                     </div>
                     <div class="row g-2 mt-2">
                         <div class="col-6 col-md-6">
                             <label class="form-label">Posição Final</label>
-                            <p class="mb-0 fw-bold fs-4 text-primary" data-campo="posicaoFinal">0.00</p>
+                            <p class="mb-0 fw-bold fs-4 text-primary" data-campo="posicaoFinal">0</p>
                         </div>
                     </div>
                 `;
@@ -531,8 +548,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const linhaMontagem = parseFloat(insumoDiv.querySelector('[data-campo="linhaMontagem"]').value) || 0;
             const sobrou = estoque - desceu;
             const posicaoFinal = sobrou + desceu + linhaMontagem;
-            insumoDiv.querySelector('[data-campo="sobrou"]').textContent = sobrou.toFixed(2);
-            insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent = posicaoFinal.toFixed(2);
+            insumoDiv.querySelector('[data-campo="sobrou"]').textContent = sobrou;
+            insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent = posicaoFinal;
         };
 
         formContagem.addEventListener('submit', (event) => {
