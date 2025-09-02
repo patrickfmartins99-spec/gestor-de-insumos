@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
 
-    // --- FUNÇÕES AUXILIARES DE RELATÓRIO (MOVIDAS PARA O TOPO) ---
+    // --- FUNÇÕES AUXILIARES DE RELATÓRIO ---
     const gerarRelatorioPDF = (contagem, filenamePrefix) => {
         const insumos = getInsumos();
         const dadosEmpresa = {
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let dataAtual = new Date().toLocaleDateString('pt-BR');
         let horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-        if (!contagem || Object.keys(contagem.detalhesContagem).length === 0) {
+        if (!contagem || !contagem.detalhesContagem || Object.keys(contagem.detalhesContagem).length === 0) {
             alert('Não há dados de contagem para gerar o relatório.');
             return;
         }
@@ -668,18 +668,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const posicaoFinal = parseFloat(insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent) || 0;
                 detalhesContagem[id] = { estoque, desceu, linhaMontagem, sobrou, posicaoFinal };
             });
+            
+            // Verifique se a contagem tem insumos antes de salvar
+            if (Object.keys(detalhesContagem).length === 0) {
+                alert('Nenhum insumo foi contado. Por favor, adicione insumos antes de salvar.');
+                return;
+            }
+
             const novaContagem = {
                 id: `contagem-${Date.now()}`,
                 data: dataContagem,
                 responsavel: responsavel,
                 detalhesContagem
             };
-
-            // Verifica se a contagem tem insumos antes de salvar
-            if (Object.keys(detalhesContagem).length === 0) {
-                alert('Nenhum insumo foi contado. Por favor, adicione insumos antes de salvar.');
-                return;
-            }
 
             setUltimaContagem(novaContagem);
             saveHistoricoContagens(novaContagem);
