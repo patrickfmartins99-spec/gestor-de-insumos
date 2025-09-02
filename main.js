@@ -41,7 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FUNÇÃO PARA INICIALIZAR INSUMOS ---
     function inicializarInsumos() {
-        const insumosExistentes = getInsumos();
+        // Verifica se já existem insumos no localStorage
+        const insumosExistentes = getInsumos(); 
+
+        // Se a lista de insumos for vazia, adiciona os dados padrão
         if (insumosExistentes.length === 0) {
             const insumosPadrao = [
                 { id: 'insumo-4queijos', nome: '4 queijos', unidade: 'porção' },
@@ -83,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveInsumos(insumosPadrao);
         }
     }
+
 
     // --- FUNÇÕES AUXILIARES DE RELATÓRIO ---
     const gerarRelatorioPDF = (contagem, filenamePrefix) => {
@@ -428,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const insumoId = selectInsumo.value;
             const quantidade = parseFloat(quantidadeEntradaInput.value);
 
-            if (!insumoId || isNaN(quantidade) || quantidade <= 0) { // CORREÇÃO: quantitude -> quantidade
+            if (!insumoId || isNaN(quantidade) || quantidade <= 0) { 
                 alert('Por favor, selecione um insumo e digite uma quantidade válida.');
                 return;
             }
@@ -520,10 +524,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
                 listaInsumosDiv.appendChild(insumoDiv);
-                calcularValoresInsumo(insumoDiv, ultimaPosicaoFinal);
+                calcularValoresInsumo(insumoDiv);
                 const inputs = insumoDiv.querySelectorAll('input[type="number"]');
                 inputs.forEach(input => {
-                    input.addEventListener('input', () => calcularValoresInsumo(insumoDiv, ultimaPosicaoFinal));
+                    input.addEventListener('input', () => calcularValoresInsumo(insumoDiv));
                 });
             });
         };
@@ -569,13 +573,6 @@ document.addEventListener('DOMContentLoaded', () => {
             formContagem.reset();
             renderizarInsumosContagem();
         });
-        
-        // Ação do botão "Ver Estoque"
-        if (btnVerEstoque) {
-            btnVerEstoque.addEventListener('click', () => {
-                window.location.href = 'estoque.html';
-            });
-        }
         
         renderizarInsumosContagem();
     }
