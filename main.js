@@ -99,6 +99,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        let tabelaRows = '';
+        Object.keys(contagem.detalhesContagem).forEach(insumoId => {
+            const insumoInfo = getInsumos().find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
+            const dados = contagem.detalhesContagem[insumoId];
+            
+            tabelaRows += `
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #000;">${insumoInfo.nome}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.estoque}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.desceu}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.linhaMontagem}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.sobrou}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center; font-weight: bold; font-size: 16px;">${dados.posicaoFinal}</td>
+                </tr>
+            `;
+        });
+        
         let conteudoRelatorio = `
             <div style="font-family: Arial, sans-serif; padding: 20px; color: #000;">
                 <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #000;">
@@ -124,25 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </tr>
                     </thead>
                     <tbody>
-        `;
-        
-        Object.keys(contagem.detalhesContagem).forEach(insumoId => {
-            const insumoInfo = getInsumos().find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
-            const dados = contagem.detalhesContagem[insumoId];
-            
-            conteudoRelatorio += `
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #000;">${insumoInfo.nome}</td>
-                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.estoque}</td>
-                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.desceu}</td>
-                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.linhaMontagem}</td>
-                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.sobrou}</td>
-                    <td style="padding: 10px; border: 1px solid #000; text-align: center; font-weight: bold; font-size: 16px;">${dados.posicaoFinal}</td>
-                </tr>
-            `;
-        });
-        
-        conteudoRelatorio += `
+                        ${tabelaRows}
                     </tbody>
                 </table>
                 
@@ -173,22 +172,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let tabelaHTML = `
-            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #000;">
-                <thead style="background-color: #333; color: white;">
-                    <tr>
-                        <th style="padding: 8px; border: 1px solid #000; text-align: left; font-size: 12px;">INSUMO</th>
-                        <th style="padding: 8px; border: 1px solid #000; text-align: left; font-size: 12px;">UNIDADE</th>
-                        <th style="padding: 8px; border: 1px solid #000; text-align: left; font-size: 12px;">ESTOQUE ATUAL</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        
+        let tabelaRows = '';
         Object.keys(ultimaContagem.detalhesContagem).forEach(insumoId => {
             const insumoInfo = getInsumos().find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
             const sobrou = ultimaContagem.detalhesContagem[insumoId]?.sobrou || 0;
-            tabelaHTML += `
+            tabelaRows += `
                 <tr>
                     <td style="padding: 8px; border: 1px solid #000; font-size: 12px;">${insumoInfo.nome}</td>
                     <td style="padding: 8px; border: 1px solid #000; font-size: 12px;">${insumoInfo.unidade}</td>
@@ -196,11 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </tr>
             `;
         });
-        
-        tabelaHTML += `
-                </tbody>
-            </table>
-        `;
         
         let conteudoRelatorio = `
             <div style="font-family: Arial, sans-serif; padding: 2rem;">
@@ -212,7 +195,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div style="margin-bottom: 1.5rem; font-size: 14px;">
                     <p style="margin: 0;"><strong>Data da Análise:</strong> ${dataAtual}</p>
                 </div>
-                ${tabelaHTML}
+                <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #000;">
+                    <thead style="background-color: #333; color: white;">
+                        <tr>
+                            <th style="padding: 8px; border: 1px solid #000; text-align: left; font-size: 12px;">INSUMO</th>
+                            <th style="padding: 8px; border: 1px solid #000; text-align: left; font-size: 12px;">UNIDADE</th>
+                            <th style="padding: 8px; border: 1px solid #000; text-align: left; font-size: 12px;">ESTOQUE ATUAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tabelaRows}
+                    </tbody>
+                </table>
             </div>
         `;
 
@@ -659,18 +653,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const detalhesContagem = {};
             const insumosNaTela = document.querySelectorAll('.insumo-item');
+            let temDados = false;
             insumosNaTela.forEach(insumoDiv => {
                 const id = insumoDiv.dataset.id;
                 const estoque = parseFloat(insumoDiv.querySelector('[data-campo="estoque"]').value) || 0;
                 const desceu = parseFloat(insumoDiv.querySelector('[data-campo="desceu"]').value) || 0;
                 const linhaMontagem = parseFloat(insumoDiv.querySelector('[data-campo="linhaMontagem"]').value) || 0;
-                const sobrou = parseFloat(insumoDiv.querySelector('[data-campo="sobrou"]').textContent) || 0;
-                const posicaoFinal = parseFloat(insumoDiv.querySelector('[data-campo="posicaoFinal"]').textContent) || 0;
+                const sobrou = estoque - desceu;
+                const posicaoFinal = sobrou + desceu + linhaMontagem;
+                
                 detalhesContagem[id] = { estoque, desceu, linhaMontagem, sobrou, posicaoFinal };
+
+                if (estoque > 0 || desceu > 0 || linhaMontagem > 0) {
+                    temDados = true;
+                }
             });
             
-            // Verifique se a contagem tem insumos antes de salvar
-            if (Object.keys(detalhesContagem).length === 0) {
+            if (!temDados) {
                 alert('Nenhum insumo foi contado. Por favor, adicione insumos antes de salvar.');
                 return;
             }
