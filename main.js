@@ -93,7 +93,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let dataAtual = new Date().toLocaleDateString('pt-BR');
         let horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        
+
+        if (!contagem || Object.keys(contagem.detalhesContagem).length === 0) {
+            alert('Não há dados de contagem para gerar o relatório.');
+            return;
+        }
+
         let conteudoRelatorio = `
             <div style="font-family: Arial, sans-serif; padding: 20px; color: #000;">
                 <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #000;">
@@ -221,6 +226,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
         html2pdf().set(options).from(conteudoRelatorio).save();
     };
+
+
+    // --- FUNÇÃO PARA INICIALIZAR INSUMOS ---
+    function inicializarInsumos() {
+        const insumosExistentes = getInsumos(); 
+        if (insumosExistentes.length === 0) {
+            const insumosPadrao = [
+                { id: 'insumo-4queijos', nome: '4 queijos', unidade: 'porção' },
+                { id: 'insumo-azeitona', nome: 'Azeitona', unidade: 'balde' },
+                { id: 'insumo-bacon', nome: 'Bacon', unidade: 'porção' },
+                { id: 'insumo-brocolis', nome: 'Brócolis', unidade: 'pote' },
+                { id: 'insumo-calabresa', nome: 'Calabresa', unidade: 'porção' },
+                { id: 'insumo-calabresapicante', nome: 'Calabresa picante', unidade: 'porção' },
+                { id: 'insumo-camarao', nome: 'Camarão', unidade: 'porção' },
+                { id: 'insumo-carnedepanela', nome: 'Carne de panela', unidade: 'porção' },
+                { id: 'insumo-cebola', nome: 'Cebola', unidade: 'balde' },
+                { id: 'insumo-cebolacaramelizada', nome: 'Cebola caramelizada', unidade: 'pote' },
+                { id: 'insumo-chester', nome: 'Chester', unidade: 'porção' },
+                { id: 'insumo-coracao', nome: 'Coração', unidade: 'porção' },
+                { id: 'insumo-costelao', nome: 'Costelão', unidade: 'porção' },
+                { id: 'insumo-doritos', nome: 'Doritos', unidade: 'porção' },
+                { id: 'insumo-frangoaomolho', nome: 'Frango ao molho', unidade: 'porção' },
+                { id: 'insumo-frangoemcubos', nome: 'Frango em cubos', unidade: 'porção' },
+                { id: 'insumo-geleia', nome: 'Geleia de amora', unidade: 'balde' },
+                { id: 'insumo-iscasdecarne', nome: 'Iscas de carne', unidade: 'porção' },
+                { id: 'insumo-macacaramelizada', nome: 'Maçã caramelizada', unidade: 'pote' },
+                { id: 'insumo-molhobarbecue', nome: 'Molho Barbecue', unidade: 'balde' },
+                { id: 'insumo-molhopesto', nome: 'Molho pesto', unidade: 'pote' },
+                { id: 'insumo-molhoalhoeoleo', nome: 'Molho alho e óleo', unidade: 'pote' },
+                { id: 'insumo-molhomaracuja', nome: 'Molho de Maracujá', unidade: 'pote' },
+                { id: 'insumo-molhovermelho', nome: 'Molho vermelho pra Camarão', unidade: 'pote' },
+                { id: 'insumo-ovoemconserva', nome: 'Ovo em conserva', unidade: 'balde' },
+                { id: 'insumo-parmesao', nome: 'Parmesão', unidade: 'unidade' },
+                { id: 'insumo-pepperoni', nome: 'Pepperoni', unidade: 'porção' },
+                { id: 'insumo-presunto', nome: 'Presunto', unidade: 'porção' },
+                { id: 'insumo-queijobrie', nome: 'Queijo brie', unidade: 'porção' },
+                { id: 'insumo-queijogorgonzola', nome: 'Queijo gorgonzola', unidade: 'porção' },
+                { id: 'insumo-salmao', nome: 'Salmão', unidade: 'porção' },
+                { id: 'insumo-strogonoffcarne', nome: 'Strogonoff de carne', unidade: 'porção' },
+                { id: 'insumo-strogonofffrango', nome: 'Strogonoff de frango', unidade: 'porção' },
+                { id: 'insumo-tomate', nome: 'Tomate', unidade: 'pote' },
+                { id: 'insumo-vinagrete', nome: 'Vinagrete', unidade: 'pote' }
+            ];
+            saveInsumos(insumosPadrao);
+        }
+    }
 
 
     // --- LÓGICA DE PÁGINAS ---
@@ -499,88 +550,4 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (detalhes) {
                     detalhes.posicaoFinal = parseFloat(detalhes.posicaoFinal || 0) + quantidade;
                     detalhes.sobrou = parseFloat(detalhes.sobrou || 0) + quantidade;
-                    setUltimaContagem(ultimaContagem);
-                }
-            } else {
-                const insumoExistente = getInsumos().find(insumo => insumo.id === insumoId);
-                if (insumoExistente) {
-                    ultimaContagem = {
-                        id: 'entrada-inicial',
-                        data: new Date().toISOString().split('T')[0],
-                        responsavel: 'Sistema',
-                        detalhesContagem: {
-                            [insumoId]: {
-                                estoque: quantidade,
-                                desceu: 0,
-                                linhaMontagem: 0,
-                                sobrou: quantidade,
-                                posicaoFinal: quantidade
-                            }
-                        }
-                    };
-                    setUltimaContagem(ultimaContagem);
-                }
-            }
-            alert('Entrada de insumo registrada com sucesso!');
-            formEntrada.reset();
-            renderizarHistoricoEntradas();
-        };
-
-        formEntrada.addEventListener('submit', registrarEntrada);
-        renderizarSelectInsumos();
-        renderizarHistoricoEntradas();
-    }
-
-    // Lógica para a tela de Contagem (index.html)
-    const formContagem = document.getElementById('formContagem');
-    const listaInsumosDiv = document.getElementById('listaInsumos');
-
-    if (formContagem) {
-        const renderizarInsumosContagem = () => {
-            const insumos = getInsumos();
-            const ultimaContagem = getUltimaContagem();
-            listaInsumosDiv.innerHTML = '';
-            if (insumos.length === 0) {
-                listaInsumosDiv.innerHTML = '<p class="text-center text-muted">Nenhum insumo cadastrado. Vá para "Gerenciar Insumos" para adicionar.</p>';
-                return;
-            }
-            insumos.forEach(insumo => {
-                const insumoDiv = document.createElement('div');
-                insumoDiv.classList.add('insumo-item', 'border', 'p-3', 'rounded', 'mb-3');
-                insumoDiv.dataset.id = insumo.id;
-
-                const ultimaPosicaoFinal = ultimaContagem?.detalhesContagem?.[insumo.id]?.posicaoFinal || 0;
-
-                insumoDiv.innerHTML = `
-                    <h5 class="insumo-nome">${insumo.nome} <span class="badge bg-primary ms-2">${insumo.unidade}</span></h5>
-                    <p class="text-muted small mb-2">Última Posição Final: <span class="fw-bold">${ultimaPosicaoFinal}</span></p>
-                    <div class="row g-2 align-items-end">
-                        <div class="col-6 col-md-3">
-                            <label class="form-label">Estoque</label>
-                            <input type="number" step="any" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${ultimaPosicaoFinal}">
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <label class="form-label">Desceu</label>
-                            <input type="number" step="any" class="form-control form-control-sm" data-campo="desceu" placeholder="Qtd. Desceu" value="0">
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <label class="form-label">Linha Montagem</label>
-                            <input type="number" step="any" class="form-control form-control-sm" data-campo="linhaMontagem" placeholder="Qtd. Linha" value="0">
-                        </div>
-                        <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
-                            <label class="form-label">Sobrou</label>
-                            <p class="mb-0 fw-bold fs-4 text-success" data-campo="sobrou">0</p>
-                        </div>
-                    </div>
-                    <div class="row g-2 mt-2">
-                        <div class="col-6 col-md-6">
-                            <label class="form-label">Posição Final</label>
-                            <p class="mb-0 fw-bold fs-4 text-primary" data-campo="posicaoFinal">0</p>
-                        </div>
-                    </div>
-                `;
-                listaInsumosDiv.appendChild(insumoDiv);
-                calcularValoresInsumo(insumoDiv);
-                const inputs = insumoDiv.querySelectorAll('input[type="number"]');
-                inputs.forEach(input => {
-                    input.
+                    setUltimaContagem(ultimaCont
