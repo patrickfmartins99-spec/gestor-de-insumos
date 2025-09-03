@@ -99,19 +99,29 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const isLowStock = (value) => {
+            return value <= 1 || value === 20 || value < 0;
+        };
+
         let tabelaRows = '';
         Object.keys(contagem.detalhesContagem).forEach(insumoId => {
             const insumoInfo = getInsumos().find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
             const dados = contagem.detalhesContagem[insumoId];
             
+            const estoqueStyle = isLowStock(dados.estoque) ? 'color: red; font-weight: bold;' : '';
+            const desceuStyle = isLowStock(dados.desceu) ? 'color: red; font-weight: bold;' : '';
+            const linhaMontagemStyle = isLowStock(dados.linhaMontagem) ? 'color: red; font-weight: bold;' : '';
+            const sobrouStyle = isLowStock(dados.sobrou) ? 'color: red; font-weight: bold;' : '';
+            const posicaoFinalStyle = isLowStock(dados.posicaoFinal) ? 'color: red; font-weight: bold;' : '';
+
             tabelaRows += `
                 <tr>
                     <td style="padding: 10px; border: 1px solid #000;">${insumoInfo.nome}</td>
-                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.estoque}</td>
-                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.desceu}</td>
-                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.linhaMontagem}</td>
-                    <td style="padding: 10px; border: 1px solid #000; text-align: center;">${dados.sobrou}</td>
-                    <td style="padding: 10px; border: 1px solid #000; text-align: center; font-weight: bold; font-size: 16px;">${dados.posicaoFinal}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center; ${estoqueStyle}">${dados.estoque}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center; ${desceuStyle}">${dados.desceu}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center; ${linhaMontagemStyle}">${dados.linhaMontagem}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center; ${sobrouStyle}">${dados.sobrou}</td>
+                    <td style="padding: 10px; border: 1px solid #000; text-align: center; font-weight: bold; ${posicaoFinalStyle}">${dados.posicaoFinal}</td>
                 </tr>
             `;
         });
@@ -172,15 +182,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const isLowStock = (value) => {
+            return value <= 1 || value === 20 || value < 0;
+        };
+
         let tabelaRows = '';
         Object.keys(ultimaContagem.detalhesContagem).forEach(insumoId => {
             const insumoInfo = getInsumos().find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
             const sobrou = ultimaContagem.detalhesContagem[insumoId]?.sobrou || 0;
+            const posicaoFinal = ultimaContagem.detalhesContagem[insumoId]?.posicaoFinal || 0;
+
+            const sobrouStyle = isLowStock(sobrou) ? 'color: red; font-weight: bold;' : '';
+            
             tabelaRows += `
                 <tr>
                     <td style="padding: 8px; border: 1px solid #000; font-size: 12px;">${insumoInfo.nome}</td>
                     <td style="padding: 8px; border: 1px solid #000; font-size: 12px;">${insumoInfo.unidade}</td>
-                    <td style="padding: 8px; border: 1px solid #000; font-size: 12px;">${sobrou}</td>
+                    <td style="padding: 8px; border: 1px solid #000; font-size: 12px; ${sobrouStyle}">${sobrou}</td>
                 </tr>
             `;
         });
@@ -287,15 +305,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             semEstoqueText.style.display = 'none';
 
+            const isLowStock = (value) => {
+                return value <= 1 || value === 20 || value < 0;
+            };
+
             Object.keys(ultimaContagem.detalhesContagem).forEach(insumoId => {
                 const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
                 const sobrou = ultimaContagem.detalhesContagem[insumoId]?.sobrou || 0;
                 
                 const tr = document.createElement('tr');
+                const sobrouClass = isLowStock(sobrou) ? 'text-danger fw-bold' : 'text-end fw-bold';
+
                 tr.innerHTML = `
                     <td>${insumoInfo.nome}</td>
                     <td><span class="badge bg-primary">${insumoInfo.unidade}</span></td>
-                    <td class="text-end fw-bold">${sobrou}</td>
+                    <td class="${sobrouClass}">${sobrou}</td>
                 `;
                 tabelaEstoqueBody.appendChild(tr);
             });
@@ -589,20 +613,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 listaInsumosDiv.innerHTML = '<p class="text-center text-muted">Nenhum insumo cadastrado. Vá para "Gerenciar Insumos" para adicionar.</p>';
                 return;
             }
+
+            const isLowStock = (value) => {
+                return value <= 1 || value === 20 || value < 0;
+            };
+
             insumos.forEach(insumo => {
                 const insumoDiv = document.createElement('div');
                 insumoDiv.classList.add('insumo-item', 'border', 'p-3', 'rounded', 'mb-3');
                 insumoDiv.dataset.id = insumo.id;
 
                 const ultimaPosicaoFinal = ultimaContagem?.detalhesContagem?.[insumo.id]?.posicaoFinal || 0;
+                const ultimoSobrou = ultimaContagem?.detalhesContagem?.[insumo.id]?.sobrou || 0;
+                
+                const estoqueInicial = ultimoSobrou;
+                
+                const ultimaPosicaoClass = isLowStock(ultimaPosicaoFinal) ? 'text-danger fw-bold' : '';
 
                 insumoDiv.innerHTML = `
                     <h5 class="insumo-nome">${insumo.nome} <span class="badge bg-primary ms-2">${insumo.unidade}</span></h5>
-                    <p class="text-muted small mb-2">Última Posição Final: <span class="fw-bold">${ultimaPosicaoFinal}</span></p>
+                    <p class="text-muted small mb-2">Último Sobrou: <span class="${ultimaPosicaoClass}">${ultimoSobrou}</span></p>
                     <div class="row g-2 align-items-end">
                         <div class="col-6 col-md-3">
                             <label class="form-label">Estoque</label>
-                            <input type="number" step="any" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${ultimaPosicaoFinal}">
+                            <input type="number" step="any" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${estoqueInicial}">
                         </div>
                         <div class="col-6 col-md-3">
                             <label class="form-label">Desceu</label>
