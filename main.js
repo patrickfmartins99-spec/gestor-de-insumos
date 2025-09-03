@@ -659,10 +659,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const estoque = parseFloat(insumoDiv.querySelector('[data-campo="estoque"]').value) || 0;
                 const desceu = parseFloat(insumoDiv.querySelector('[data-campo="desceu"]').value) || 0;
                 const linhaMontagem = parseFloat(insumoDiv.querySelector('[data-campo="linhaMontagem"]').value) || 0;
-                const sobrou = estoque - desceu;
-                const posicaoFinal = sobrou + desceu + linhaMontagem;
                 
-                detalhesContagem[id] = { estoque, desceu, linhaMontagem, sobrou, posicaoFinal };
+                detalhesContagem[id] = { 
+                    estoque, 
+                    desceu, 
+                    linhaMontagem, 
+                    sobrou: estoque - desceu, 
+                    posicaoFinal: (estoque - desceu) + desceu + linhaMontagem
+                };
 
                 if (estoque > 0 || desceu > 0 || linhaMontagem > 0) {
                     temDados = true;
