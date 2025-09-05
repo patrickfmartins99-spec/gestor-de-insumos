@@ -2,90 +2,161 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histórico de Contagens</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="Histórico de contagens de insumos - La Giovana's Pizzaria">
+    <meta name="author" content="La Giovana's Pizzaria">
+    <title>Histórico de Contagens - La Giovana's Pizzaria</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
 </head>
 <body class="bg-light">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top" role="navigation" aria-label="Navegação principal">
         <div class="container-fluid">
             <span class="navbar-brand text-light fw-bold">La Giovana's Pizzaria</span>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.html"><i class="bi bi-house me-2"></i>Contagem</a>
+                        <a class="nav-link" href="index.html">
+                            <i class="bi bi-house me-2"></i>Contagem
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="estoque.html"><i class="bi bi-box-seam me-2"></i>Estoque Atual</a>
+                        <a class="nav-link" href="estoque.html">
+                            <i class="bi bi-box-seam me-2"></i>Estoque Atual
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="historico.html"><i class="bi bi-clock-history me-2"></i>Histórico</a>
+                        <a class="nav-link active" href="historico.html" aria-current="page">
+                            <i class="bi bi-clock-history me-2"></i>Histórico
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="entrada.html"><i class="bi bi-truck me-2"></i>Entrada</a>
+                        <a class="nav-link" href="entrada.html">
+                            <i class="bi bi-truck me-2"></i>Entrada
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="gerenciar.html"><i class="bi bi-gear me-2"></i>Gerenciar</a>
+                        <a class="nav-link" href="gerenciar.html">
+                            <i class="bi bi-gear me-2"></i>Gerenciar
+                        </a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container my-5">
-        <h1 class="text-center mb-4">Histórico de Contagens</h1>
+    <main class="container my-5" role="main">
+        <header class="text-center mb-4">
+            <h1 class="mb-3">Histórico de Contagens</h1>
+            <p class="text-muted">Registros anteriores de contagem de insumos</p>
+        </header>
 
-        <div class="card p-4 shadow-sm mb-4">
-            <h2 class="card-title text-center mb-4">Contagens Anteriores</h2>
+        <section class="card p-4 shadow-sm mb-4" aria-labelledby="contagensAnterioresTitle">
+            <h2 id="contagensAnterioresTitle" class="card-title text-center mb-4">Contagens Anteriores</h2>
+            
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                <div>Clique no ícone de visualização para ver os detalhes completos de cada contagem.</div>
+            </div>
+
             <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
+                <table class="table table-striped table-hover" aria-describedby="tabelaDescricao">
+                    <caption id="tabelaDescricao" class="visually-hidden">Lista de contagens anteriores realizadas no sistema</caption>
+                    <thead class="table-dark">
                         <tr>
-                            <th>Data</th>
-                            <th>Responsável</th>
-                            <th class="text-end">Ações</th>
+                            <th scope="col">Data</th>
+                            <th scope="col">Responsável</th>
+                            <th scope="col" class="text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaHistorico">
+                        <!-- Conteúdo dinâmico -->
                     </tbody>
                 </table>
             </div>
-            <p id="semHistorico" class="text-center text-muted mt-3" style="display: none;">
-                Nenhuma contagem encontrada no histórico.
+            
+            <div id="loadingHistorico" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando histórico...</span>
+                </div>
+                <p class="mt-2 text-muted">Carregando histórico de contagens...</p>
+            </div>
+
+            <p id="semHistorico" class="text-center text-muted mt-3" style="display: none;" role="alert">
+                <i class="bi bi-inbox me-2"></i>Nenhuma contagem encontrada no histórico.
             </p>
-        </div>
+        </section>
         
-        <div id="relatorio-pdf" class="d-none">
+        <!-- Área oculta para geração de PDF -->
+        <div id="relatorio-pdf" class="d-none" aria-hidden="true">
             <h1 class="text-center mb-4">Relatório de Contagem</h1>
             <div id="dados-contagem"></div>
             <div id="tabela-relatorio"></div>
         </div>
-    </div>
+    </main>
 
+    <footer class="bg-dark text-light py-3 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 La Giovana's Pizzaria - Sistema de Gestão de Insumos</p>
+        </div>
+    </footer>
+
+    <!-- Modal de Detalhes da Contagem -->
     <div class="modal fade" id="modalContagem" tabindex="-1" aria-labelledby="modalContagemLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalContagemLabel">Detalhes da Contagem</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body" id="modalContagemBody">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando detalhes...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Carregando detalhes da contagem...</p>
                     </div>
+                </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Fechar
+                    </button>
+                    <button type="button" class="btn btn-danger" id="btnExcluirContagem" style="display: none;">
+                        <i class="bi bi-trash me-1"></i>Excluir Contagem
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="main.js"></script>
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="modalConfirmacaoExclusao" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir esta contagem?</p>
+                    <p class="text-muted small">Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmarExclusao">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="main.js" defer></script>
 </body>
-</html>
+    </html>
