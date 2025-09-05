@@ -2,89 +2,195 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrada de Insumos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="Registro de entrada de insumos - La Giovana's Pizzaria">
+    <meta name="author" content="La Giovana's Pizzaria">
+    <title>Entrada de Insumos - La Giovana's Pizzaria</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top" role="navigation" aria-label="Navegação principal">
         <div class="container-fluid">
             <span class="navbar-brand text-light fw-bold">La Giovana's Pizzaria</span>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.html"><i class="bi bi-house me-2"></i>Contagem</a>
+                        <a class="nav-link" href="index.html">
+                            <i class="bi bi-house me-2"></i>Contagem
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="estoque.html"><i class="bi bi-box-seam me-2"></i>Estoque Atual</a>
+                        <a class="nav-link" href="estoque.html">
+                            <i class="bi bi-box-seam me-2"></i>Estoque Atual
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="historico.html"><i class="bi bi-clock-history me-2"></i>Histórico</a>
+                        <a class="nav-link" href="historico.html">
+                            <i class="bi bi-clock-history me-2"></i>Histórico
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="entrada.html"><i class="bi bi-truck me-2"></i>Entrada</a>
+                        <a class="nav-link active" href="entrada.html" aria-current="page">
+                            <i class="bi bi-truck me-2"></i>Entrada
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="gerenciar.html"><i class="bi bi-gear me-2"></i>Gerenciar</a>
+                        <a class="nav-link" href="gerenciar.html">
+                            <i class="bi bi-gear me-2"></i>Gerenciar
+                        </a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container my-5">
-        <h1 class="text-center mb-4">Entrada de Insumos</h1>
+    <main class="container my-5" role="main">
+        <header class="text-center mb-4">
+            <h1 class="mb-3">Entrada de Insumos</h1>
+            <p class="text-muted">Registro de recebimento de insumos no estoque</p>
+        </header>
 
-        <div class="card p-4 shadow-sm mb-4">
-            <h2 class="card-title text-center mb-4">Registrar Nova Entrada</h2>
-            <form id="formEntrada">
-                <div class="mb-3">
-                    <label for="selectInsumo" class="form-label">Selecione o Insumo</label>
-                    <select class="form-select" id="selectInsumo" required>
-                        <option value="">-- Selecione um insumo --</option>
+        <section class="card p-4 shadow-sm mb-4" aria-labelledby="registrarEntradaTitle">
+            <h2 id="registrarEntradaTitle" class="card-title text-center mb-4">Registrar Nova Entrada</h2>
+            
+            <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                <div>Registre aqui a entrada de insumos recebidos para atualizar o estoque.</div>
+            </div>
+
+            <form id="formEntrada" novalidate>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="selectInsumo" class="form-label">
+                            <i class="bi bi-box me-1"></i>Selecione o Insumo
+                        </label>
+                        <select class="form-select" id="selectInsumo" required aria-describedby="insumoHelp">
+                            <option value="">-- Selecione um insumo --</option>
+                            <!-- Options serão carregados dinamicamente -->
                         </select>
+                        <div class="invalid-feedback">Por favor, selecione um insumo.</div>
+                        <small id="insumoHelp" class="form-text text-muted">Selecione o insumo que está entrando no estoque</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="quantidadeEntrada" class="form-label">
+                            <i class="bi bi-123 me-1"></i>Quantidade Recebida
+                        </label>
+                        <input type="number" class="form-control" id="quantidadeEntrada" 
+                               placeholder="Ex: 50" min="0.01" step="0.01" required
+                               aria-describedby="quantidadeHelp">
+                        <div class="invalid-feedback">Informe uma quantidade válida (maior que zero).</div>
+                        <small id="quantidadeHelp" class="form-text text-muted">Digite a quantidade recebida</small>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="quantidadeEntrada" class="form-label">Quantidade Recebida</label>
-                    <input type="number" class="form-control" id="quantidadeEntrada" placeholder="Ex: 50" required>
-                </div>
+
                 <div class="d-grid mt-4">
-                    <button type="submit" class="btn btn-info btn-lg">
+                    <button type="submit" class="btn btn-info btn-lg" id="btnRegistrarEntrada">
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none;"></span>
                         <i class="bi bi-truck me-2"></i>Registrar Entrada
                     </button>
                 </div>
             </form>
-        </div>
+        </section>
 
-        <div class="card p-4 shadow-sm mt-5">
-            <h2 class="card-title text-center mb-4">Últimas Entradas</h2>
+        <section class="card p-4 shadow-sm mt-5" aria-labelledby="ultimasEntradasTitle">
+            <h2 id="ultimasEntradasTitle" class="card-title text-center mb-4">Últimas Entradas</h2>
+
+            <div class="alert alert-warning d-flex align-items-center mb-3" role="alert" id="alertAtualizacaoEstoque" style="display: none;">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <div>As entradas afetam diretamente o estoque atual. Edite com cuidado.</div>
+            </div>
+
             <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
+                <table class="table table-striped table-hover" aria-describedby="tabelaEntradasDescricao">
+                    <caption id="tabelaEntradasDescricao" class="visually-hidden">Histórico de entradas de insumos registradas no sistema</caption>
+                    <thead class="table-dark">
                         <tr>
-                            <th>Insumo</th>
-                            <th>Quantidade</th>
-                            <th>Data</th>
-                            <th class="text-end">Ações</th>
+                            <th scope="col">Insumo</th>
+                            <th scope="col">Quantidade</th>
+                            <th scope="col">Data</th>
+                            <th scope="col" class="text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaHistoricoEntradas">
+                        <!-- Conteúdo dinâmico -->
                     </tbody>
                 </table>
             </div>
-            <p id="semEntradasText" class="text-center text-muted mt-3" style="display: none;">
-                Nenhuma entrada de insumo encontrada.
+
+            <div id="loadingEntradas" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando entradas...</span>
+                </div>
+                <p class="mt-2 text-muted">Carregando histórico de entradas...</p>
+            </div>
+
+            <p id="semEntradasText" class="text-center text-muted mt-3" style="display: none;" role="alert">
+                <i class="bi bi-inbox me-2"></i>Nenhuma entrada de insumo encontrada.
             </p>
+        </section>
+    </main>
+
+    <footer class="bg-dark text-light py-3 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 La Giovana's Pizzaria - Sistema de Gestão de Insumos</p>
+        </div>
+    </footer>
+
+    <!-- Modal de Edição de Entrada -->
+    <div class="modal fade" id="modalEditarEntrada" tabindex="-1" aria-labelledby="modalEditarEntradaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEditarEntradaLabel">Editar Entrada</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEditarEntrada" novalidate>
+                        <input type="hidden" id="editarEntradaId">
+                        <div class="mb-3">
+                            <label for="editarEntradaQuantidade" class="form-label">Nova Quantidade</label>
+                            <input type="number" class="form-control" id="editarEntradaQuantidade" 
+                                   min="0.01" step="0.01" required>
+                            <div class="invalid-feedback">Informe uma quantidade válida.</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnSalvarEdicaoEntrada">Salvar</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="main.js"></script>
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="modalConfirmacaoExclusaoEntrada" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir esta entrada?</p>
+                    <p class="text-muted small">Esta ação ajustará o estoque e não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmarExclusaoEntrada">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="main.js" defer></script>
 </body>
 </html>
