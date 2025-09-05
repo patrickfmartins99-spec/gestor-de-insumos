@@ -245,24 +245,86 @@ const Notificacoes = {
 // Atribuir a função de notificação às Utils
 Utils.mostrarNotificacao = Notificacoes.mostrarNotificacao;
 
+// ===== MIGRAÇÃO DE CHAVES ANTIGAS =====
+function migrarChavesAntigas() {
+    console.log('Verificando migração de chaves antigas...');
+    
+    const mapeamentoChaves = {
+        'insumos': 'insumos',
+        'historicoContagens': 'historicoContagens',
+        'historicoEntradas': 'historicoEntradas', 
+        'ultimaContagem': 'ultimaContagem'
+    };
+
+    let migrados = 0;
+    
+    Object.entries(mapeamentoChaves).forEach(([chaveAntiga, chaveNova]) => {
+        try {
+            const dado = localStorage.getItem(chaveAntiga);
+            if (dado && !localStorage.getItem(chaveNova)) {
+                localStorage.setItem(chaveNova, dado);
+                console.log(`Migrado: ${chaveAntiga} → ${chaveNova}`);
+                migrados++;
+            }
+        } catch (error) {
+            console.error(`Erro ao migrar ${chaveAntiga}:`, error);
+        }
+    });
+
+    if (migrados > 0) {
+        console.log(`Migração concluída: ${migrados} chaves migradas`);
+    }
+}
+
+// ===== VERIFICAÇÃO DE DADOS EXISTENTES =====
+function verificarDadosExistentes() {
+    console.log('=== VERIFICAÇÃO DE DADOS EXISTENTES ===');
+    
+    const dados = {
+        insumos: StorageManager.getInsumos(),
+        historicoContagens: StorageManager.getHistoricoContagens(),
+        historicoEntradas: StorageManager.getHistoricoEntradas(),
+        ultimaContagem: StorageManager.getUltimaContagem()
+    };
+
+    console.log('Insumos:', dados.insumos.length, 'registros');
+    console.log('Contagens históricas:', dados.historicoContagens.length, 'registros');
+    console.log('Entradas:', dados.historicoEntradas.length, 'registros');
+    console.log('Última contagem:', dados.ultimaContagem ? 'Existe' : 'Não existe');
+    
+    return dados;
+}
+
 // ===== INICIALIZAÇÃO DO SISTEMA =====
 function inicializarSistema() {
+    console.log('🚀 Inicializando sistema...');
+    
+    // 1. Migrar chaves antigas primeiro
+    migrarChavesAntigas();
+    
+    // 2. Migrar dados de versão
     migrarDados();
+    
+    // 3. Inicializar insumos padrão se necessário
     inicializarInsumos();
+    
+    // 4. Verificar dados existentes
+    const dados = verificarDadosExistentes();
+    
+    // 5. Inicializar event listeners
     inicializarEventListeners();
+    
+    console.log('✅ Sistema inicializado com sucesso');
 }
 
 function migrarDados() {
     const versaoAtual = localStorage.getItem('versao_sistema');
     if (!versaoAtual || versaoAtual !== CONFIG.versaoSistema) {
         try {
+            console.log(`Migrando dados da versão ${versaoAtual || 'null'} para ${CONFIG.versaoSistema}`);
+            
             // Fazer backup antes da migração
             fazerBackupAutomatico();
-            
-            // Migrar dados se necessário
-            if (!versaoAtual) {
-                console.log('Migrando dados para versão', CONFIG.versaoSistema);
-            }
             
             localStorage.setItem('versao_sistema', CONFIG.versaoSistema);
         } catch (error) {
@@ -283,6 +345,7 @@ function fazerBackupAutomatico() {
         };
         
         localStorage.setItem('backup_auto', JSON.stringify(dados));
+        console.log('✅ Backup automático realizado');
     } catch (error) {
         console.error('Erro ao fazer backup automático:', error);
     }
@@ -290,7 +353,10 @@ function fazerBackupAutomatico() {
 
 function inicializarInsumos() {
     const insumosExistentes = StorageManager.getInsumos();
+    console.log('Insumos existentes:', insumosExistentes.length);
+    
     if (insumosExistentes.length === 0) {
+        console.log('Inicializando insumos padrão...');
         const insumosPadrao = [
             { id: 'insumo-4queijos', nome: '4 queijos', unidade: 'porção' },
             { id: 'insumo-azeitona', nome: 'Azeitona', unidade: 'balde' },
@@ -328,13 +394,82 @@ function inicializarInsumos() {
             { id: 'insumo-tomate', nome: 'Tomate', unidade: 'pote' },
             { id: 'insumo-vinagrete', nome: 'Vinagrete', unidade: 'pote' }
         ];
-        StorageManager.saveInsumos(insumosPadrao);
+        
+        if (StorageManager.saveInsumos(insumosPadrao)) {
+            console.log('✅ Insumos padrão cadastrados:', insumosPadrao.length);
+        }
+    } else {
+        console.log('✅ Insumos já existem:', insumosExistentes.length);
     }
 }
 
 function inicializarEventListeners() {
-    // Event listeners globais serão adicionados aqui
-    console.log('Sistema inicializado com sucesso');
+    console.log('Inicializando event listeners...');
+    
+    // Renderizar dados das páginas específicas após carregamento
+    setTimeout(() => {
+        const path = window.location.pathname;
+        const page = path.split('/').pop() || 'index.html';
+        
+        console.log('Página atual:', page);
+        
+        switch(page) {
+            case 'index.html':
+                if (typeof renderizarInsumosContagem === 'function') {
+                    console.log('Renderizando contagem...');
+                    renderizarInsumosContagem();
+                }
+                break;
+            case 'estoque.html':
+                if (typeof renderizarEstoque === 'function') {
+                    console.log('Renderizando estoque...');
+                    renderizarEstoque();
+                }
+                break;
+            case 'historico.html':
+                if (typeof renderizarHistorico === 'function') {
+                    console.log('Renderizando histórico...');
+                    renderizarHistorico();
+                }
+                break;
+            case 'gerenciar.html':
+                if (typeof renderizarTabelaInsumos === 'function') {
+                    console.log('Renderizando gerenciamento...');
+                    renderizarTabelaInsumos();
+                }
+                break;
+            case 'entrada.html':
+                if (typeof renderizarSelectInsumos === 'function') {
+                    console.log('Renderizando select de insumos...');
+                    renderizarSelectInsumos();
+                }
+                if (typeof renderizarHistoricoEntradas === 'function') {
+                    console.log('Renderizando histórico de entradas...');
+                    renderizarHistoricoEntradas();
+                }
+                break;
+        }
+    }, 100);
+}
+
+// ===== DEBUG DO SISTEMA =====
+function debugSistema() {
+    console.log('=== DEBUG DO SISTEMA ===');
+    console.log('LocalStorage keys:', Object.keys(localStorage));
+    
+    const insumos = StorageManager.getInsumos();
+    console.log('Insumos:', insumos);
+    
+    const historico = StorageManager.getHistoricoContagens();
+    console.log('Histórico contagens:', historico);
+    
+    const entradas = StorageManager.getHistoricoEntradas();
+    console.log('Entradas:', entradas);
+    
+    const ultimaContagem = StorageManager.getUltimaContagem();
+    console.log('Última contagem:', ultimaContagem);
+    
+    console.log('=========================');
 }
 
 // ===== FUNÇÕES DE RELATÓRIO PDF =====
@@ -485,7 +620,11 @@ const RelatorioPDF = {
 
 // ===== LÓGICA DE PÁGINAS =====
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOM Carregado - Iniciando sistema...');
     inicializarSistema();
+    
+    // Debug após inicialização
+    setTimeout(debugSistema, 500);
 
     // --- LÓGICA PARA A TELA DE ESTOQUE (estoque.html) ---
     const tabelaEstoqueBody = document.getElementById('tabelaEstoque');
@@ -500,83 +639,91 @@ document.addEventListener('DOMContentLoaded', () => {
         let estoqueOrdenado = false;
 
         const renderizarEstoque = () => {
+            console.log('🔄 Renderizando estoque...');
             const ultimaContagem = StorageManager.getUltimaContagem();
             const insumos = StorageManager.getInsumos();
-            tabelaEstoqueBody.innerHTML = '';
-
-            if (!ultimaContagem || Object.keys(ultimaContagem.detalhesContagem).length === 0) {
-                semEstoqueText.style.display = 'block';
-                document.getElementById('loadingEstoque')?.style.display = 'none';
-                return;
-            }
             
-            semEstoqueText.style.display = 'none';
-            document.getElementById('loadingEstoque')?.style.display = 'none';
-
-            let insumosArray = Object.keys(ultimaContagem.detalhesContagem).map(insumoId => {
-                const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
-                const sobrou = ultimaContagem.detalhesContagem[insumoId]?.sobrou || 0;
-                return { id: insumoId, nome: insumoInfo.nome, unidade: insumoInfo.unidade, quantidade: sobrou };
-            });
-
-            // Aplicar busca
-            const termoBusca = buscaEstoque?.value.toLowerCase() || '';
-            if (termoBusca) {
-                insumosArray = insumosArray.filter(insumo => 
-                    insumo.nome.toLowerCase().includes(termoBusca)
-                );
-            }
-
-            // Aplicar ordenação
-            if (estoqueOrdenado) {
-                insumosArray.sort((a, b) => a.nome.localeCompare(b.nome));
-            }
-
-            // Atualizar contadores
-            let normalCount = 0, baixoCount = 0, criticoCount = 0;
-            
-            insumosArray.forEach(insumo => {
-                const sobrou = ultimaContagem.detalhesContagem[insumo.id]?.sobrou || 0;
-                let status = 'normal';
-                let statusClass = 'success';
-                let statusIcon = 'bi-check-circle';
-                
-                if (sobrou <= CONFIG.estoqueCritico) {
-                    status = 'crítico';
-                    statusClass = 'danger';
-                    statusIcon = 'bi-x-circle';
-                    criticoCount++;
-                } else if (sobrou <= CONFIG.estoqueBaixo) {
-                    status = 'baixo';
-                    statusClass = 'warning';
-                    statusIcon = 'bi-exclamation-triangle';
-                    baixoCount++;
-                } else {
-                    normalCount++;
+            if (tabelaEstoqueBody) {
+                tabelaEstoqueBody.innerHTML = '';
+                if (document.getElementById('loadingEstoque')) {
+                    document.getElementById('loadingEstoque').style.display = 'none';
                 }
 
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${insumo.nome}</td>
-                    <td><span class="badge bg-primary">${insumo.unidade}</span></td>
-                    <td class="text-center">
-                        <span class="badge bg-${statusClass}">
-                            <i class="bi ${statusIcon} me-1"></i>${status}
-                        </span>
-                    </td>
-                    <td class="text-end fw-bold ${sobrou <= CONFIG.estoqueBaixo ? 'text-danger' : ''}">
-                        ${sobrou}
-                    </td>
-                `;
-                tabelaEstoqueBody.appendChild(tr);
-            });
+                if (!ultimaContagem || Object.keys(ultimaContagem.detalhesContagem).length === 0) {
+                    if (semEstoqueText) semEstoqueText.style.display = 'block';
+                    console.log('⚠️ Nenhuma contagem encontrada para estoque');
+                    return;
+                }
+                
+                if (semEstoqueText) semEstoqueText.style.display = 'none';
 
-            // Atualizar contadores
-            if (document.getElementById('totalInsumos')) {
-                document.getElementById('totalInsumos').textContent = insumosArray.length;
-                document.getElementById('normalCount').textContent = `${normalCount} normais`;
-                document.getElementById('baixoCount').textContent = `${baixoCount} baixos`;
-                document.getElementById('criticoCount').textContent = `${criticoCount} críticos`;
+                let insumosArray = Object.keys(ultimaContagem.detalhesContagem).map(insumoId => {
+                    const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
+                    const sobrou = ultimaContagem.detalhesContagem[insumoId]?.sobrou || 0;
+                    return { id: insumoId, nome: insumoInfo.nome, unidade: insumoInfo.unidade, quantidade: sobrou };
+                });
+
+                // Aplicar busca
+                const termoBusca = buscaEstoque?.value.toLowerCase() || '';
+                if (termoBusca) {
+                    insumosArray = insumosArray.filter(insumo => 
+                        insumo.nome.toLowerCase().includes(termoBusca)
+                    );
+                }
+
+                // Aplicar ordenação
+                if (estoqueOrdenado) {
+                    insumosArray.sort((a, b) => a.nome.localeCompare(b.nome));
+                }
+
+                // Atualizar contadores
+                let normalCount = 0, baixoCount = 0, criticoCount = 0;
+                
+                insumosArray.forEach(insumo => {
+                    const sobrou = ultimaContagem.detalhesContagem[insumo.id]?.sobrou || 0;
+                    let status = 'normal';
+                    let statusClass = 'success';
+                    let statusIcon = 'bi-check-circle';
+                    
+                    if (sobrou <= CONFIG.estoqueCritico) {
+                        status = 'crítico';
+                        statusClass = 'danger';
+                        statusIcon = 'bi-x-circle';
+                        criticoCount++;
+                    } else if (sobrou <= CONFIG.estoqueBaixo) {
+                        status = 'baixo';
+                        statusClass = 'warning';
+                        statusIcon = 'bi-exclamation-triangle';
+                        baixoCount++;
+                    } else {
+                        normalCount++;
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${insumo.nome}</td>
+                        <td><span class="badge bg-primary">${insumo.unidade}</span></td>
+                        <td class="text-center">
+                            <span class="badge bg-${statusClass}">
+                                <i class="bi ${statusIcon} me-1"></i>${status}
+                            </span>
+                        </td>
+                        <td class="text-end fw-bold ${sobrou <= CONFIG.estoqueBaixo ? 'text-danger' : ''}">
+                            ${sobrou}
+                        </td>
+                    `;
+                    tabelaEstoqueBody.appendChild(tr);
+                });
+
+                // Atualizar contadores
+                if (document.getElementById('totalInsumos')) {
+                    document.getElementById('totalInsumos').textContent = insumosArray.length;
+                    document.getElementById('normalCount').textContent = `${normalCount} normais`;
+                    document.getElementById('baixoCount').textContent = `${baixoCount} baixos`;
+                    document.getElementById('criticoCount').textContent = `${criticoCount} críticos`;
+                }
+                
+                console.log('✅ Estoque renderizado:', insumosArray.length, 'itens');
             }
         };
 
@@ -664,65 +811,75 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (tabelaHistoricoBody) {
         const renderizarHistorico = () => {
-            const historico = StorageManager.getHistoricoContagens().reverse();
-            tabelaHistoricoBody.innerHTML = '';
-            document.getElementById('loadingHistorico')?.style.display = 'none';
+            console.log('🔄 Renderizando histórico...');
+            const historico = StorageManager.getHistoricoContagens();
             
-            if (historico.length === 0) {
-                semHistoricoText.style.display = 'block';
-                return;
+            if (tabelaHistoricoBody) {
+                tabelaHistoricoBody.innerHTML = '';
+                if (document.getElementById('loadingHistorico')) {
+                    document.getElementById('loadingHistorico').style.display = 'none';
+                }
+                
+                if (!historico || historico.length === 0) {
+                    if (semHistoricoText) semHistoricoText.style.display = 'block';
+                    console.log('⚠️ Nenhum histórico encontrado');
+                    return;
+                }
+                
+                if (semHistoricoText) semHistoricoText.style.display = 'none';
+                
+                // Reverter para mostrar os mais recentes primeiro
+                historico.reverse().forEach(contagem => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${Utils.formatarData(contagem.data)}</td>
+                        <td>${contagem.responsavel}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-info btn-detalhes me-2" data-id="${contagem.id}" title="Ver detalhes">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger btn-excluir-historico me-2" data-id="${contagem.id}" title="Excluir contagem">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-success btn-baixar-pdf" data-id="${contagem.id}" title="Baixar PDF">
+                                <i class="bi bi-file-earmark-arrow-down"></i>
+                            </button>
+                        </td>
+                    `;
+                    tabelaHistoricoBody.appendChild(tr);
+                });
+
+                // Event listeners para os botões
+                document.querySelectorAll('.btn-detalhes').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const contagemId = e.currentTarget.dataset.id;
+                        const contagem = StorageManager.getHistoricoContagens().find(c => c.id === contagemId);
+                        if (contagem) {
+                            mostrarDetalhesContagem(contagem);
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.btn-baixar-pdf').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const contagemId = e.currentTarget.dataset.id;
+                        const contagem = StorageManager.getHistoricoContagens().find(c => c.id === contagemId);
+                        if (contagem) {
+                            RelatorioPDF.gerarRelatorioPDF(contagem, `Relatorio_Contagem`);
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.btn-excluir-historico').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const contagemId = e.currentTarget.dataset.id;
+                        document.getElementById('btnConfirmarExclusao').dataset.id = contagemId;
+                        new bootstrap.Modal(document.getElementById('modalConfirmacaoExclusao')).show();
+                    });
+                });
+                
+                console.log('✅ Histórico renderizado:', historico.length, 'contagens');
             }
-            
-            semHistoricoText.style.display = 'none';
-            
-            historico.forEach(contagem => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${Utils.formatarData(contagem.data)}</td>
-                    <td>${contagem.responsavel}</td>
-                    <td class="text-end">
-                        <button class="btn btn-sm btn-outline-info btn-detalhes me-2" data-id="${contagem.id}" title="Ver detalhes">
-                            <i class="bi bi-eye"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger btn-excluir-historico me-2" data-id="${contagem.id}" title="Excluir contagem">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-success btn-baixar-pdf" data-id="${contagem.id}" title="Baixar PDF">
-                            <i class="bi bi-file-earmark-arrow-down"></i>
-                        </button>
-                    </td>
-                `;
-                tabelaHistoricoBody.appendChild(tr);
-            });
-
-            // Event listeners para os botões
-            document.querySelectorAll('.btn-detalhes').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const contagemId = e.currentTarget.dataset.id;
-                    const contagem = StorageManager.getHistoricoContagens().find(c => c.id === contagemId);
-                    if (contagem) {
-                        mostrarDetalhesContagem(contagem);
-                    }
-                });
-            });
-
-            document.querySelectorAll('.btn-baixar-pdf').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const contagemId = e.currentTarget.dataset.id;
-                    const contagem = StorageManager.getHistoricoContagens().find(c => c.id === contagemId);
-                    if (contagem) {
-                        RelatorioPDF.gerarRelatorioPDF(contagem, `Relatorio_Contagem`);
-                    }
-                });
-            });
-
-            document.querySelectorAll('.btn-excluir-historico').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const contagemId = e.currentTarget.dataset.id;
-                    document.getElementById('btnConfirmarExclusao').dataset.id = contagemId;
-                    new bootstrap.Modal(document.getElementById('modalConfirmacaoExclusao')).show();
-                });
-            });
         };
 
         const mostrarDetalhesContagem = (contagem) => {
@@ -800,52 +957,65 @@ document.addEventListener('DOMContentLoaded', () => {
         let insumosOrdenados = false;
 
         const renderizarTabelaInsumos = () => {
+            console.log('🔄 Renderizando tabela de insumos...');
             let insumos = StorageManager.getInsumos();
-            tabelaInsumosBody.innerHTML = '';
-            document.getElementById('loadingInsumos')?.style.display = 'none';
             
-            // Aplicar busca
-            const termoBusca = buscaInsumos?.value.toLowerCase() || '';
-            if (termoBusca) {
-                insumos = insumos.filter(insumo => 
-                    insumo.nome.toLowerCase().includes(termoBusca) ||
-                    insumo.unidade.toLowerCase().includes(termoBusca)
+            if (tabelaInsumosBody) {
+                tabelaInsumosBody.innerHTML = '';
+                if (document.getElementById('loadingInsumos')) {
+                    document.getElementById('loadingInsumos').style.display = 'none';
+                }
+                
+                if (!insumos || insumos.length === 0) {
+                    if (semInsumosText) semInsumosText.style.display = 'block';
+                    if (document.getElementById('contadorInsumos')) {
+                        document.getElementById('contadorInsumos').textContent = 'Nenhum insumo cadastrado';
+                    }
+                    console.log('⚠️ Nenhum insumo cadastrado');
+                    return;
+                }
+                
+                if (semInsumosText) semInsumosText.style.display = 'none';
+                if (document.getElementById('contadorInsumos')) {
+                    document.getElementById('contadorInsumos').textContent = `Total: ${insumos.length} insumos`;
+                }
+
+                // Aplicar busca
+                const termoBusca = buscaInsumos?.value.toLowerCase() || '';
+                if (termoBusca) {
+                    insumos = insumos.filter(insumo => 
+                        insumo.nome.toLowerCase().includes(termoBusca) ||
+                        insumo.unidade.toLowerCase().includes(termoBusca)
                 );
+                }
+
+                // Aplicar ordenação
+                if (insumosOrdenados) {
+                    insumos.sort((a, b) => a.nome.localeCompare(b.nome));
+                }
+
+                insumos.forEach(insumo => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${insumo.nome}</td>
+                        <td><span class="badge bg-primary">${insumo.unidade}</span></td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-info me-2 btn-editar" data-id="${insumo.id}" title="Editar insumo">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger btn-excluir" data-id="${insumo.id}" title="Excluir insumo">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tabelaInsumosBody.appendChild(tr);
+                });
+
+                document.querySelectorAll('.btn-editar').forEach(btn => btn.addEventListener('click', (e) => editarInsumo(e.currentTarget.dataset.id)));
+                document.querySelectorAll('.btn-excluir').forEach(btn => btn.addEventListener('click', (e) => prepararExclusaoInsumo(e.currentTarget.dataset.id)));
+                
+                console.log('✅ Insumos renderizados:', insumos.length, 'itens');
             }
-
-            // Aplicar ordenação
-            if (insumosOrdenados) {
-                insumos.sort((a, b) => a.nome.localeCompare(b.nome));
-            }
-
-            if (insumos.length === 0) {
-                semInsumosText.style.display = 'block';
-                document.getElementById('contadorInsumos').textContent = 'Nenhum insumo encontrado';
-                return;
-            }
-            
-            semInsumosText.style.display = 'none';
-            document.getElementById('contadorInsumos').textContent = `Total: ${insumos.length} insumos`;
-
-            insumos.forEach(insumo => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${insumo.nome}</td>
-                    <td><span class="badge bg-primary">${insumo.unidade}</span></td>
-                    <td class="text-end">
-                        <button class="btn btn-sm btn-outline-info me-2 btn-editar" data-id="${insumo.id}" title="Editar insumo">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger btn-excluir" data-id="${insumo.id}" title="Excluir insumo">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                `;
-                tabelaInsumosBody.appendChild(tr);
-            });
-
-            document.querySelectorAll('.btn-editar').forEach(btn => btn.addEventListener('click', (e) => editarInsumo(e.currentTarget.dataset.id)));
-            document.querySelectorAll('.btn-excluir').forEach(btn => btn.addEventListener('click', (e) => prepararExclusaoInsumo(e.currentTarget.dataset.id)));
         };
 
         const salvarInsumo = (event) => {
@@ -967,75 +1137,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (formEntrada) {
         const renderizarSelectInsumos = () => {
+            console.log('🔄 Renderizando select de insumos...');
             const insumos = StorageManager.getInsumos();
-            selectInsumo.innerHTML = '<option value="">-- Selecione um insumo --</option>';
             
-            insumos.forEach(insumo => {
-                const option = document.createElement('option');
-                option.value = insumo.id;
-                option.textContent = `${insumo.nome} (${insumo.unidade})`;
-                selectInsumo.appendChild(option);
-            });
+            if (selectInsumo) {
+                selectInsumo.innerHTML = '<option value="">-- Selecione um insumo --</option>';
+                
+                if (insumos && insumos.length > 0) {
+                    insumos.forEach(insumo => {
+                        const option = document.createElement('option');
+                        option.value = insumo.id;
+                        option.textContent = `${insumo.nome} (${insumo.unidade})`;
+                        selectInsumo.appendChild(option);
+                    });
+                    console.log('✅ Select de insumos carregado:', insumos.length, 'opções');
+                } else {
+                    console.log('⚠️ Nenhum insumo para carregar no select');
+                }
+            }
         };
 
         const renderizarHistoricoEntradas = () => {
-            const historico = StorageManager.getHistoricoEntradas().reverse();
+            console.log('🔄 Renderizando histórico de entradas...');
+            const historico = StorageManager.getHistoricoEntradas();
             const insumos = StorageManager.getInsumos();
-            tabelaHistoricoEntradasBody.innerHTML = '';
-            document.getElementById('loadingEntradas')?.style.display = 'none';
             
-            if (historico.length === 0) {
-                semEntradasText.style.display = 'block';
-                return;
+            if (tabelaHistoricoEntradasBody) {
+                tabelaHistoricoEntradasBody.innerHTML = '';
+                if (document.getElementById('loadingEntradas')) {
+                    document.getElementById('loadingEntradas').style.display = 'none';
+                }
+                
+                if (!historico || historico.length === 0) {
+                    if (semEntradasText) semEntradasText.style.display = 'block';
+                    console.log('⚠️ Nenhuma entrada encontrada');
+                    return;
+                }
+                
+                if (semEntradasText) semEntradasText.style.display = 'none';
+
+                // Reverter para mostrar as mais recentes primeiro
+                historico.reverse().forEach(entrada => {
+                    const insumoInfo = insumos.find(i => i.id === entrada.insumoId) || { nome: 'Insumo Desconhecido', unidade: '' };
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${insumoInfo.nome}</td>
+                        <td>${entrada.quantidade}</td>
+                        <td>${Utils.formatarData(entrada.data)}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-info me-2 btn-editar-entrada" data-id="${entrada.id}" title="Editar entrada">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger btn-excluir-entrada" data-id="${entrada.id}" title="Excluir entrada">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tabelaHistoricoEntradasBody.appendChild(tr);
+                });
+
+                // Event listeners para edição
+                document.querySelectorAll('.btn-editar-entrada').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const entradaId = e.currentTarget.dataset.id;
+                        const historico = StorageManager.getHistoricoEntradas();
+                        const entrada = historico.find(e => e.id === entradaId);
+                        const insumos = StorageManager.getInsumos();
+                        
+                        if (entrada) {
+                            const insumoNome = insumos.find(i => i.id === entrada.insumoId)?.nome || 'Insumo Desconhecido';
+                            document.getElementById('editarEntradaId').value = entradaId;
+                            document.getElementById('editarEntradaQuantidade').value = entrada.quantidade;
+                            document.getElementById('modalEditarEntradaLabel').textContent = `Editar Entrada - ${insumoNome}`;
+                            new bootstrap.Modal(document.getElementById('modalEditarEntrada')).show();
+                        }
+                    });
+                });
+
+                // Event listeners para exclusão
+                document.querySelectorAll('.btn-excluir-entrada').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const entradaId = e.currentTarget.dataset.id;
+                        document.getElementById('btnConfirmarExclusaoEntrada').dataset.id = entradaId;
+                        new bootstrap.Modal(document.getElementById('modalConfirmacaoExclusaoEntrada')).show();
+                    });
+                });
+                
+                console.log('✅ Entradas renderizadas:', historico.length, 'registros');
             }
-            
-            semEntradasText.style.display = 'none';
-
-            historico.forEach(entrada => {
-                const insumoInfo = insumos.find(i => i.id === entrada.insumoId) || { nome: 'Insumo Desconhecido', unidade: '' };
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${insumoInfo.nome}</td>
-                    <td>${entrada.quantidade}</td>
-                    <td>${Utils.formatarData(entrada.data)}</td>
-                    <td class="text-end">
-                        <button class="btn btn-sm btn-outline-info me-2 btn-editar-entrada" data-id="${entrada.id}" title="Editar entrada">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger btn-excluir-entrada" data-id="${entrada.id}" title="Excluir entrada">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                `;
-                tabelaHistoricoEntradasBody.appendChild(tr);
-            });
-
-            // Event listeners para edição
-            document.querySelectorAll('.btn-editar-entrada').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const entradaId = e.currentTarget.dataset.id;
-                    const historico = StorageManager.getHistoricoEntradas();
-                    const entrada = historico.find(e => e.id === entradaId);
-                    const insumos = StorageManager.getInsumos();
-                    
-                    if (entrada) {
-                        const insumoNome = insumos.find(i => i.id === entrada.insumoId)?.nome || 'Insumo Desconhecido';
-                        document.getElementById('editarEntradaId').value = entradaId;
-                        document.getElementById('editarEntradaQuantidade').value = entrada.quantidade;
-                        document.getElementById('modalEditarEntradaLabel').textContent = `Editar Entrada - ${insumoNome}`;
-                        new bootstrap.Modal(document.getElementById('modalEditarEntrada')).show();
-                    }
-                });
-            });
-
-            // Event listeners para exclusão
-            document.querySelectorAll('.btn-excluir-entrada').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const entradaId = e.currentTarget.dataset.id;
-                    document.getElementById('btnConfirmarExclusaoEntrada').dataset.id = entradaId;
-                    new bootstrap.Modal(document.getElementById('modalConfirmacaoExclusaoEntrada')).show();
-                });
-            });
         };
 
         const registrarEntrada = (event) => {
@@ -1119,65 +1308,72 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (formContagem) {
         const renderizarInsumosContagem = () => {
+            console.log('🔄 Renderizando insumos para contagem...');
             const insumos = StorageManager.getInsumos();
             const ultimaContagem = StorageManager.getUltimaContagem();
-            listaInsumosDiv.innerHTML = '';
+            
+            if (listaInsumosDiv) {
+                listaInsumosDiv.innerHTML = '';
 
-            if (insumos.length === 0) {
-                listaInsumosDiv.innerHTML = '<p class="text-center text-muted">Nenhum insumo cadastrado. Vá para "Gerenciar Insumos" para adicionar.</p>';
-                return;
-            }
+                if (!insumos || insumos.length === 0) {
+                    listaInsumosDiv.innerHTML = '<p class="text-center text-muted">Nenhum insumo cadastrado. Vá para "Gerenciar Insumos" para adicionar.</p>';
+                    console.log('⚠️ Nenhum insumo para contagem');
+                    return;
+                }
 
-            insumos.forEach(insumo => {
-                const insumoDiv = document.createElement('div');
-                insumoDiv.classList.add('insumo-item', 'border', 'p-3', 'rounded', 'mb-3');
-                insumoDiv.dataset.id = insumo.id;
+                insumos.forEach(insumo => {
+                    const insumoDiv = document.createElement('div');
+                    insumoDiv.classList.add('insumo-item', 'border', 'p-3', 'rounded', 'mb-3');
+                    insumoDiv.dataset.id = insumo.id;
 
-                const ultimoSobrou = ultimaContagem?.detalhesContagem?.[insumo.id]?.sobrou || 0;
-                const estoqueInicial = ultimoSobrou;
-                
-                const ultimaPosicaoClass = Utils.isEstoqueBaixo(ultimoSobrou) ? 'text-danger fw-bold' : '';
+                    const ultimoSobrou = ultimaContagem?.detalhesContagem?.[insumo.id]?.sobrou || 0;
+                    const estoqueInicial = ultimoSobrou;
+                    
+                    const ultimaPosicaoClass = Utils.isEstoqueBaixo(ultimoSobrou) ? 'text-danger fw-bold' : '';
 
-                insumoDiv.innerHTML = `
-                    <h5 class="insumo-nome">${insumo.nome} <span class="badge bg-primary ms-2">${insumo.unidade}</span></h5>
-                    <p class="text-muted small mb-2">Último Sobrou: <span class="${ultimaPosicaoClass}">${ultimoSobrou}</span></p>
-                    <div class="row g-2 align-items-end">
-                        <div class="col-6 col-md-3">
-                            <label class="form-label">Estoque</label>
-                            <input type="number" step="0.01" min="0" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${estoqueInicial}">
+                    insumoDiv.innerHTML = `
+                        <h5 class="insumo-nome">${insumo.nome} <span class="badge bg-primary ms-2">${insumo.unidade}</span></h5>
+                        <p class="text-muted small mb-2">Último Sobrou: <span class="${ultimaPosicaoClass}">${ultimoSobrou}</span></p>
+                        <div class="row g-2 align-items-end">
+                            <div class="col-6 col-md-3">
+                                <label class="form-label">Estoque</label>
+                                <input type="number" step="0.01" min="0" class="form-control form-control-sm" data-campo="estoque" placeholder="Qtd. Estoque" value="${estoqueInicial}">
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label">Desceu</label>
+                                <input type="number" step="0.01" min="0" class="form-control form-control-sm" data-campo="desceu" placeholder="Qtd. Desceu" value="0">
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label">Linha Montagem</label>
+                                <input type="number" step="0.01" min="0" class="form-control form-control-sm" data-campo="linhaMontagem" placeholder="Qtd. Linha" value="0">
+                            </div>
+                            <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
+                                <label class="form-label">Sobrou</label>
+                                <p class="mb-0 fw-bold fs-4 text-success" data-campo="sobrou">0</p>
+                            </div>
                         </div>
-                        <div class="col-6 col-md-3">
-                            <label class="form-label">Desceu</label>
-                            <input type="number" step="0.01" min="0" class="form-control form-control-sm" data-campo="desceu" placeholder="Qtd. Desceu" value="0">
+                        <div class="row g-2 mt-2">
+                            <div class="col-6 col-md-6">
+                                <label class="form-label">Posição Final</label>
+                                <p class="mb-0 fw-bold fs-4 text-primary" data-campo="posicaoFinal">0</p>
+                            </div>
                         </div>
-                        <div class="col-6 col-md-3">
-                            <label class="form-label">Linha Montagem</label>
-                            <input type="number" step="0.01" min="0" class="form-control form-control-sm" data-campo="linhaMontagem" placeholder="Qtd. Linha" value="0">
-                        </div>
-                        <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
-                            <label class="form-label">Sobrou</label>
-                            <p class="mb-0 fw-bold fs-4 text-success" data-campo="sobrou">0</p>
-                        </div>
-                    </div>
-                    <div class="row g-2 mt-2">
-                        <div class="col-6 col-md-6">
-                            <label class="form-label">Posição Final</label>
-                            <p class="mb-0 fw-bold fs-4 text-primary" data-campo="posicaoFinal">0</p>
-                        </div>
-                    </div>
-                `;
-                listaInsumosDiv.appendChild(insumoDiv);
-                calcularValoresInsumo(insumoDiv);
-                
-                const inputs = insumoDiv.querySelectorAll('input[type="number"]');
-                inputs.forEach(input => {
-                    input.addEventListener('input', () => calcularValoresInsumo(insumoDiv));
-                    input.addEventListener('blur', (e) => {
-                        if (e.target.value < 0) e.target.value = 0;
-                        calcularValoresInsumo(insumoDiv);
+                    `;
+                    listaInsumosDiv.appendChild(insumoDiv);
+                    calcularValoresInsumo(insumoDiv);
+                    
+                    const inputs = insumoDiv.querySelectorAll('input[type="number"]');
+                    inputs.forEach(input => {
+                        input.addEventListener('input', () => calcularValoresInsumo(insumoDiv));
+                        input.addEventListener('blur', (e) => {
+                            if (e.target.value < 0) e.target.value = 0;
+                            calcularValoresInsumo(insumoDiv);
+                        });
                     });
                 });
-            });
+                
+                console.log('✅ Insumos para contagem renderizados:', insumos.length, 'itens');
+            }
         };
 
         const calcularValoresInsumo = (insumoDiv) => {
@@ -1294,3 +1490,4 @@ function fazerBackup() {
 window.fazerBackup = fazerBackup;
 window.Utils = Utils;
 window.StorageManager = StorageManager;
+window.debugSistema = debugSistema;
