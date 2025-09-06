@@ -3,52 +3,58 @@
 const RelatorioPDF = {
     // Função para gerar o HTML do relatório de contagem
     gerarHtmlContagem: (contagem, insumos) => {
+        const dataContagemFormatada = Utils.formatarData(contagem.data);
+        const dataGeracaoFormatada = Utils.formatarData(new Date());
+
         let tabelaRows = '';
         Object.keys(contagem.detalhesContagem).forEach(insumoId => {
             const insumoInfo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
             const dados = contagem.detalhesContagem[insumoId];
             
-            // Lógica para colorir as linhas com base no status do estoque
-            let rowClass = '';
-            if (Utils.isEstoqueBaixo(dados.posicaoFinal)) {
-                rowClass = 'text-danger';
-            }
-
             tabelaRows += `
-                <tr class="${rowClass}">
-                    <td>${insumoInfo.nome}</td>
-                    <td>${insumoInfo.unidade}</td>
-                    <td class="text-end">${dados.posicaoFinal}</td>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #000;">${insumoInfo.nome}</td>
+                    <td style="padding: 8px; border: 1px solid #000; text-align: center;">${dados.estoque}</td>
+                    <td style="padding: 8px; border: 1px solid #000; text-align: center;">${dados.desceu}</td>
+                    <td style="padding: 8px; border: 1px solid #000; text-align: center;">${dados.linhaMontagem}</td>
+                    <td style="padding: 8px; border: 1px solid #000; text-align: center;">${dados.sobrou}</td>
+                    <td style="padding: 8px; border: 1px solid #000; text-align: center;">${dados.posicaoFinal}</td>
                 </tr>
             `;
         });
 
-        // O HTML retornado deve ser uma string completa, fácil de renderizar.
-        // O design foi simplificado para evitar bugs de renderização do html2pdf.js.
+        // Este HTML se assemelha mais ao seu modelo, mas com estilos simplificados para evitar erros de renderização.
         return `
-            <div class="pdf-container">
-                <div class="pdf-header text-center">
-                    <h1 class="pdf-title">Relatório de Contagem</h1>
-                    <p class="pdf-subtitle">La Giovana's Pizzaria</p>
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #000;">
+                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #000;">
+                    <h1 style="margin: 0; color: #000; font-size: 24px;">La Giovana's Pizzaria</h1>
+                    <p style="margin: 5px 0; font-size: 18px; color: #000;">Detalhes da Contagem</p>
                 </div>
-                <div class="pdf-info">
-                    <p><strong>Responsável:</strong> ${contagem.responsavel}</p>
-                    <p><strong>Data da Contagem:</strong> ${Utils.formatarData(contagem.data)}</p>
+                
+                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #000; border-radius: 8px;">
+                    <p style="margin: 5px 0; font-size: 16px;"><strong>Responsável:</strong> ${contagem.responsavel}</p>
+                    <p style="margin: 5px 0; font-size: 16px;"><strong>Data da contagem:</strong> ${dataContagemFormatada}</p>
+                    <p style="margin: 5px 0; font-size: 14px; color: #333;">Nº do Registro: ${contagem.id}</p>
                 </div>
-                <table class="pdf-table">
+                
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
                     <thead>
-                        <tr>
-                            <th>Insumo</th>
-                            <th>Unidade</th>
-                            <th class="text-end">Posição Final</th>
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="padding: 12px; border: 1px solid #000; text-align: left;">Insumo</th>
+                            <th style="padding: 12px; border: 1px solid #000; text-align: center;">Estoque</th>
+                            <th style="padding: 12px; border: 1px solid #000; text-align: center;">Desceu</th>
+                            <th style="padding: 12px; border: 1px solid #000; text-align: center;">Linha</th>
+                            <th style="padding: 12px; border: 1px solid #000; text-align: center;">Sobrou</th>
+                            <th style="padding: 12px; border: 1px solid #000; text-align: center;">Posição Final</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${tabelaRows}
                     </tbody>
                 </table>
-                <div class="pdf-footer text-center">
-                    <small>Relatório gerado em ${Utils.formatarData(new Date())}</small>
+                
+                <div style="text-align: center; margin-top: 25px; font-size: 12px; color: #6c757d;">
+                    Documento gerado em ${dataGeracaoFormatada}.
                 </div>
             </div>
         `;
@@ -139,4 +145,3 @@ const RelatorioPDF = {
         });
     }
 };
-
