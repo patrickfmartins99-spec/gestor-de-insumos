@@ -2,7 +2,15 @@
 const CONFIG = {
     estoqueCritico: 1,
     estoqueBaixo: 20,
-    versaoSistema: '2.1' // Versão atualizada para refletir a nova estrutura
+    versaoSistema: '2.2', // Atualizada para nova estrutura de PDF
+    storageKeys: {
+        insumos: 'insumos',
+        ultimaContagem: 'ultimaContagem',
+        historicoContagens: 'historicoContagens',
+        historicoEntradas: 'historicoEntradas',
+        versao: 'versao_sistema',
+        backup: 'backup_auto'
+    }
 };
 
 // ===== FUNÇÕES DE UTILIDADE GLOBAIS =====
@@ -10,14 +18,52 @@ const Utils = {
     // Formatação de datas
     formatarData: (data) => {
         if (!data) return 'N/A';
-        const date = new Date(data);
-        return date.toLocaleDateString('pt-BR');
+        
+        try {
+            // Converter string para Date object se necessário
+            const date = typeof data === 'string' ? new Date(data + 'T00:00:00') : new Date(data);
+            
+            // Verificar se a data é válida
+            if (isNaN(date.getTime())) return 'Data inválida';
+            
+            return date.toLocaleDateString('pt-BR');
+        } catch (error) {
+            console.error('Erro ao formatar data:', error, data);
+            return 'Erro na data';
+        }
+    },
+
+    // Formatação de data e hora
+    formatarDataHora: (data) => {
+        if (!data) return 'N/A';
+        
+        try {
+            const date = new Date(data);
+            if (isNaN(date.getTime())) return 'Data inválida';
+            
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            console.error('Erro ao formatar data/hora:', error);
+            return 'Erro na data';
+        }
     },
 
     // Obter data atual no formato YYYY-MM-DD
     getDataAtual: () => {
         const date = new Date();
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    },
+
+    // Obter data e hora atual
+    getDataHoraAtual: () => {
+        const date = new Date();
+        return date.toISOString();
     },
 
     // Verificar se o estoque está baixo ou crítico
@@ -36,75 +82,90 @@ const Utils = {
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
+    },
+
+    // Validar número com casas decimais
+    validarNumero: (valor, casasDecimais = 2) => {
+        if (valor === '' || valor === null || valor === undefined) return 0;
+        
+        let numero = parseFloat(valor);
+        if (isNaN(numero)) return 0;
+        
+        if (numero < 0) numero = 0;
+        
+        // Arredondar para as casas decimais especificadas
+        return parseFloat(numero.toFixed(casasDecimais));
+    },
+
+    // Gerar ID único
+    gerarId: (prefixo = '') => {
+        return `${prefixo}${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
 };
 
 // ===== GERENCIAMENTO DE ARMAZENAMENTO (LOCALSTORAGE) =====
 const StorageManager = {
-    // Insumos
-    getInsumos: () => {
+    // Método genérico para obter item
+    getItem: (key, defaultValue = null) => {
         try {
-            const insumos = localStorage.getItem('insumos');
-            return insumos ? JSON.parse(insumos) : [];
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : defaultValue;
         } catch (error) {
-            console.error('Erro ao carregar insumos:', error);
-            return [];
+            console.error(`Erro ao carregar ${key}:`, error);
+            Notificacoes.mostrarNotificacao(`Erro ao carregar dados. Verifique o console.`, 'error');
+            return defaultValue;
         }
     },
 
-    saveInsumos: (insumos) => {
+    // Método genérico para salvar item
+    setItem: (key, value) => {
         try {
-            localStorage.setItem('insumos', JSON.stringify(insumos));
+            localStorage.setItem(key, JSON.stringify(value));
             return true;
         } catch (error) {
-            console.error('Erro ao salvar insumos:', error);
-            Notificacoes.mostrarNotificacao('Erro ao salvar insumos. Verifique o espaço disponível.', 'error');
+            console.error(`Erro ao salvar ${key}:`, error);
+            
+            if (error.name === 'QuotaExceededError') {
+                Notificacoes.mostrarNotificacao('Espaço de armazenamento insuficiente. Limpe alguns dados.', 'error');
+            } else {
+                Notificacoes.mostrarNotificacao('Erro ao salvar dados. Tente novamente.', 'error');
+            }
+            
             return false;
         }
+    },
+
+    // Insumos
+    getInsumos: () => {
+        return StorageManager.getItem(CONFIG.storageKeys.insumos, []);
+    },
+
+    saveInsumos: (insumos) => {
+        return StorageManager.setItem(CONFIG.storageKeys.insumos, insumos);
     },
     
     // Contagem atual
     getUltimaContagem: () => {
-        try {
-            const contagem = localStorage.getItem('ultimaContagem');
-            return contagem ? JSON.parse(contagem) : null;
-        } catch (error) {
-            console.error('Erro ao carregar última contagem:', error);
-            return null;
-        }
+        return StorageManager.getItem(CONFIG.storageKeys.ultimaContagem, null);
     },
 
     setUltimaContagem: (contagem) => {
-        try {
-            localStorage.setItem('ultimaContagem', JSON.stringify(contagem));
-            return true;
-        } catch (error) {
-            console.error('Erro ao salvar última contagem:', error);
-            Notificacoes.mostrarNotificacao('Erro ao salvar contagem. Verifique o espaço disponível.', 'error');
-            return false;
-        }
+        return StorageManager.setItem(CONFIG.storageKeys.ultimaContagem, contagem);
     },
 
     // Histórico de contagens
     getHistoricoContagens: () => {
-        try {
-            const historico = localStorage.getItem('historicoContagens');
-            return historico ? JSON.parse(historico) : [];
-        } catch (error) {
-            console.error('Erro ao carregar histórico de contagens:', error);
-            return [];
-        }
+        return StorageManager.getItem(CONFIG.storageKeys.historicoContagens, []);
     },
 
     saveHistoricoContagens: (contagem) => {
         try {
             const historico = StorageManager.getHistoricoContagens();
             historico.push(contagem);
-            localStorage.setItem('historicoContagens', JSON.stringify(historico));
-            return true;
+            return StorageManager.setItem(CONFIG.storageKeys.historicoContagens, historico);
         } catch (error) {
             console.error('Erro ao salvar histórico de contagens:', error);
-            Notificacoes.mostrarNotificacao('Erro ao salvar histórico de contagens. Verifique o espaço disponível.', 'error');
+            Notificacoes.mostrarNotificacao('Erro ao salvar histórico de contagens.', 'error');
             return false;
         }
     },
@@ -113,8 +174,7 @@ const StorageManager = {
         try {
             let historico = StorageManager.getHistoricoContagens();
             const novoHistorico = historico.filter(contagem => contagem.id !== id);
-            localStorage.setItem('historicoContagens', JSON.stringify(novoHistorico));
-            return true;
+            return StorageManager.setItem(CONFIG.storageKeys.historicoContagens, novoHistorico);
         } catch (error) {
             console.error('Erro ao excluir contagem:', error);
             Notificacoes.mostrarNotificacao('Erro ao excluir contagem.', 'error');
@@ -124,24 +184,17 @@ const StorageManager = {
 
     // Histórico de entradas
     getHistoricoEntradas: () => {
-        try {
-            const historico = localStorage.getItem('historicoEntradas');
-            return historico ? JSON.parse(historico) : [];
-        } catch (error) {
-            console.error('Erro ao carregar histórico de entradas:', error);
-            return [];
-        }
+        return StorageManager.getItem(CONFIG.storageKeys.historicoEntradas, []);
     },
 
     saveHistoricoEntradas: (entrada) => {
         try {
             const historico = StorageManager.getHistoricoEntradas();
             historico.push(entrada);
-            localStorage.setItem('historicoEntradas', JSON.stringify(historico));
-            return true;
+            return StorageManager.setItem(CONFIG.storageKeys.historicoEntradas, historico);
         } catch (error) {
             console.error('Erro ao salvar entrada:', error);
-            Notificacoes.mostrarNotificacao('Erro ao salvar entrada. Verifique o espaço disponível.', 'error');
+            Notificacoes.mostrarNotificacao('Erro ao salvar entrada.', 'error');
             return false;
         }
     },
@@ -160,8 +213,7 @@ const StorageManager = {
             }
 
             const novoHistorico = historico.filter(e => e.id !== id);
-            localStorage.setItem('historicoEntradas', JSON.stringify(novoHistorico));
-            return true;
+            return StorageManager.setItem(CONFIG.storageKeys.historicoEntradas, novoHistorico);
         } catch (error) {
             console.error('Erro ao excluir entrada:', error);
             Notificacoes.mostrarNotificacao('Erro ao excluir entrada.', 'error');
@@ -186,8 +238,7 @@ const StorageManager = {
             }
 
             entradaParaAtualizar.quantidade = novaQuantidade;
-            localStorage.setItem('historicoEntradas', JSON.stringify(historico));
-            return true;
+            return StorageManager.setItem(CONFIG.storageKeys.historicoEntradas, historico);
         } catch (error) {
             console.error('Erro ao atualizar entrada:', error);
             Notificacoes.mostrarNotificacao('Erro ao atualizar entrada.', 'error');
@@ -204,14 +255,14 @@ const StorageManager = {
 
             // Remove o insumo do histórico de entradas
             let historicoEntradas = StorageManager.getHistoricoEntradas().filter(e => e.insumoId !== insumoId);
-            localStorage.setItem('historicoEntradas', JSON.stringify(historicoEntradas));
+            StorageManager.setItem(CONFIG.storageKeys.historicoEntradas, historicoEntradas);
 
             // Remove o insumo das contagens históricas
             let historicoContagens = StorageManager.getHistoricoContagens();
             historicoContagens.forEach(c => {
                 delete c.detalhesContagem[insumoId];
             });
-            localStorage.setItem('historicoContagens', JSON.stringify(historicoContagens));
+            StorageManager.setItem(CONFIG.storageKeys.historicoContagens, historicoContagens);
 
             // Remove o insumo da última contagem
             let ultimaContagem = StorageManager.getUltimaContagem();
@@ -226,15 +277,54 @@ const StorageManager = {
             Notificacoes.mostrarNotificacao('Erro ao excluir dados do insumo. Tente novamente.', 'error');
             return false;
         }
+    },
+
+    // Limpar todos os dados (apenas para desenvolvimento)
+    limparTodosDados: () => {
+        if (confirm('⚠️ ATENÇÃO: Isso apagará TODOS os dados. Tem certeza?')) {
+            Object.values(CONFIG.storageKeys).forEach(key => {
+                localStorage.removeItem(key);
+            });
+            Notificacoes.mostrarNotificacao('Todos os dados foram removidos.', 'info');
+        }
+    },
+
+    // Estatísticas do storage
+    getEstatisticasStorage: () => {
+        const stats = {};
+        let totalSize = 0;
+
+        Object.values(CONFIG.storageKeys).forEach(key => {
+            const item = localStorage.getItem(key);
+            if (item) {
+                const size = new Blob([item]).size;
+                stats[key] = {
+                    tamanho: size,
+                    tamanhoKB: (size / 1024).toFixed(2),
+                    items: key.includes('historico') ? JSON.parse(item).length : 'N/A'
+                };
+                totalSize += size;
+            }
+        });
+
+        return {
+            detalhes: stats,
+            totalKB: (totalSize / 1024).toFixed(2),
+            totalMB: (totalSize / (1024 * 1024)).toFixed(2)
+        };
     }
 };
 
 // ===== NOTIFICAÇÕES =====
 const Notificacoes = {
     mostrarNotificacao: (mensagem, tipo = 'info', tempo = 3000) => {
+        // Remover notificações existentes
         const notificacoesExistentes = document.querySelectorAll('.custom-notification');
-        notificacoesExistentes.forEach(notif => notif.remove());
+        notificacoesExistentes.forEach(notif => {
+            notif.remove();
+        });
 
+        // Criar nova notificação
         const notification = document.createElement('div');
         notification.className = `custom-notification alert alert-${tipo} alert-dismissible fade show`;
         notification.style.cssText = `
@@ -245,13 +335,20 @@ const Notificacoes = {
             min-width: 300px;
             max-width: 500px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideInRight 0.3s ease;
         `;
+        
         notification.innerHTML = `
-            ${mensagem}
+            <div class="d-flex align-items-center">
+                <i class="bi ${this.getIconePorTipo(tipo)} me-2"></i>
+                <div>${mensagem}</div>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
         `;
+        
         document.body.appendChild(notification);
 
+        // Auto-remover após o tempo especificado
         if (tempo > 0) {
             setTimeout(() => {
                 if (notification.parentNode) {
@@ -259,19 +356,39 @@ const Notificacoes = {
                 }
             }, tempo);
         }
+    },
+
+    getIconePorTipo: (tipo) => {
+        const icones = {
+            success: 'bi-check-circle-fill',
+            error: 'bi-x-circle-fill',
+            warning: 'bi-exclamation-triangle-fill',
+            info: 'bi-info-circle-fill'
+        };
+        return icones[tipo] || 'bi-info-circle-fill';
     }
 };
 
 // ===== INICIALIZAÇÃO E MIGRAÇÃO DO SISTEMA =====
 function migrarDados() {
-    const versaoAtual = localStorage.getItem('versao_sistema');
+    const versaoAtual = localStorage.getItem(CONFIG.storageKeys.versao);
+    
     if (!versaoAtual || versaoAtual !== CONFIG.versaoSistema) {
         try {
-            console.log(`Migrando dados da versão ${versaoAtual || 'null'} para ${CONFIG.versaoSistema}`);
+            console.log(`🔄 Migrando dados da versão ${versaoAtual || 'null'} para ${CONFIG.versaoSistema}`);
+            
+            // Fazer backup antes da migração
             fazerBackupAutomatico();
-            localStorage.setItem('versao_sistema', CONFIG.versaoSistema);
+            
+            // Atualizar versão
+            localStorage.setItem(CONFIG.storageKeys.versao, CONFIG.versaoSistema);
+            
+            console.log('✅ Migração concluída com sucesso');
+            Notificacoes.mostrarNotificacao('Sistema atualizado com sucesso!', 'success');
+            
         } catch (error) {
-            console.error('Erro na migração de dados:', error);
+            console.error('❌ Erro na migração de dados:', error);
+            Notificacoes.mostrarNotificacao('Erro na atualização do sistema.', 'error');
         }
     }
 }
@@ -286,17 +403,21 @@ function fazerBackupAutomatico() {
             timestamp: new Date().toISOString(),
             versao: CONFIG.versaoSistema
         };
-        localStorage.setItem('backup_auto', JSON.stringify(dados));
+        
+        StorageManager.setItem(CONFIG.storageKeys.backup, dados);
         console.log('✅ Backup automático realizado');
+        
     } catch (error) {
-        console.error('Erro ao fazer backup automático:', error);
+        console.error('❌ Erro ao fazer backup automático:', error);
     }
 }
 
 function inicializarInsumos() {
     const insumosExistentes = StorageManager.getInsumos();
+    
     if (insumosExistentes.length === 0) {
-        console.log('Inicializando insumos padrão...');
+        console.log('📦 Inicializando insumos padrão...');
+        
         const insumosPadrao = [
             { id: 'insumo-4queijos', nome: '4 queijos', unidade: 'porção' },
             { id: 'insumo-azeitona', nome: 'Azeitona', unidade: 'balde' },
@@ -334,14 +455,19 @@ function inicializarInsumos() {
             { id: 'insumo-tomate', nome: 'Tomate', unidade: 'pote' },
             { id: 'insumo-vinagrete', nome: 'Vinagrete', unidade: 'pote' }
         ];
-        StorageManager.saveInsumos(insumosPadrao);
+        
+        if (StorageManager.saveInsumos(insumosPadrao)) {
+            console.log('✅ Insumos padrão inicializados');
+        }
     }
 }
 
 // Inicialização do sistema quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Inicializando sistema de insumos...');
     migrarDados();
     inicializarInsumos();
+    console.log('✅ Sistema inicializado com sucesso');
 });
 
 // Funções globais de backup e debug para uso no console
@@ -355,6 +481,7 @@ window.fazerBackup = () => {
             timestamp: new Date().toISOString(),
             versao: CONFIG.versaoSistema
         };
+        
         const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -362,9 +489,11 @@ window.fazerBackup = () => {
         a.download = `backup_insumos_${Utils.getDataAtual()}.json`;
         a.click();
         URL.revokeObjectURL(url);
+        
         Notificacoes.mostrarNotificacao('Backup realizado com sucesso!', 'success');
+        
     } catch (error) {
-        console.error('Erro ao fazer backup:', error);
+        console.error('❌ Erro ao fazer backup:', error);
         Notificacoes.mostrarNotificacao('Erro ao realizar backup.', 'error');
     }
 };
@@ -372,10 +501,36 @@ window.fazerBackup = () => {
 window.debugSistema = () => {
     console.log('=== DEBUG DO SISTEMA ===');
     console.log('LocalStorage keys:', Object.keys(localStorage));
+    console.log('Configuração:', CONFIG);
     console.log('Insumos:', StorageManager.getInsumos());
     console.log('Histórico contagens:', StorageManager.getHistoricoContagens());
     console.log('Entradas:', StorageManager.getHistoricoEntradas());
     console.log('Última contagem:', StorageManager.getUltimaContagem());
+    console.log('Estatísticas storage:', StorageManager.getEstatisticasStorage());
     console.log('=========================');
 };
 
+window.limparDados = StorageManager.limparTodosDados;
+
+// Adicionar estilos CSS para animações
+if (!document.querySelector('#animations-css')) {
+    const style = document.createElement('style');
+    style.id = 'animations-css';
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .custom-notification {
+            animation: slideInRight 0.3s ease !important;
+        }
+    `;
+    document.head.appendChild(style);
+    }
