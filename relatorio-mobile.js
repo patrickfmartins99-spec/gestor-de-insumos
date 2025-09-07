@@ -10,7 +10,7 @@ const RelatorioMobile = {
             return null;
         }
 
-        // Gerar dados CSV
+        // Gerar dados CSV para a função interna
         const generateCSV = () => {
             let csv = 'Insumo,Unidade,Estoque,Desceu,Linha Montagem,Sobrou,Posição Final,Status\n';
             
@@ -25,7 +25,7 @@ const RelatorioMobile = {
             return csv;
         };
 
-        // CSS otimizado para mobile e impressão
+        // CSS otimizado para mobile
         const estilo = `
             <style>
                 * { 
@@ -39,7 +39,6 @@ const RelatorioMobile = {
                     background: white;
                     font-size: ${isMobile ? '14px' : '16px'};
                     line-height: 1.4;
-                    color: #2c3e50;
                 }
                 .container { 
                     max-width: 100%; 
