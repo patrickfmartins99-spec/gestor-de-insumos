@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 Notificacoes.mostrarNotificacao('Contagem salva! Gerando relatório PDF...', 'info');
                 
                 setTimeout(() => {
-                    RelatorioPDF.gerarPDF(novaContagem, 'contagem', 'Relatorio_Contagem');
+                    RelatorioMobile.gerarRelatorio(novaContagem, insumos);
                     
                     // Resetar formulário
                     formContagem.reset();
