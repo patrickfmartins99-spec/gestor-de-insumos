@@ -229,8 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
         Notificacoes.mostrarNotificacao('CSV exportado com sucesso!', 'success');
     };
 
-    // Função para gerar PDF do estoque
-    const gerarPDFEstoque = () => {
+    // Função para gerar relatório do estoque (SUBSTITUIÇÃO DO PDF)
+    const gerarRelatorioEstoque = () => {
         const ultimaContagem = StorageManager.getUltimaContagem();
         
         if (!ultimaContagem || Object.keys(ultimaContagem.detalhesContagem).length === 0) {
@@ -245,10 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(() => {
             try {
-                RelatorioPDF.gerarPDF(ultimaContagem, 'estoque', 'Relatorio_Estoque');
+                RelatorioMobile.gerarRelatorio(ultimaContagem, StorageManager.getInsumos());
             } catch (error) {
-                console.error('❌ Erro ao gerar PDF:', error);
-                Notificacoes.mostrarNotificacao('Erro ao gerar PDF. Verifique o console.', 'error');
+                console.error('❌ Erro ao gerar relatório:', error);
+                Notificacoes.mostrarNotificacao('Erro ao gerar relatório. Verifique o console.', 'error');
             } finally {
                 // Restaurar botão
                 btnGerarPdfEstoque.innerHTML = originalHTML;
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Configurar event listeners
     const configurarEventListeners = () => {
         if (btnGerarPdfEstoque) {
-            btnGerarPdfEstoque.addEventListener('click', gerarPDFEstoque);
+            btnGerarPdfEstoque.addEventListener('click', gerarRelatorioEstoque);
         }
 
         if (btnAtualizarEstoque) {
