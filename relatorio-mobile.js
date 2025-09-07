@@ -10,7 +10,7 @@ const RelatorioMobile = {
             return null;
         }
 
-        // Gerar dados CSV para a função interna
+        // Gerar dados CSV
         const generateCSV = () => {
             let csv = 'Insumo,Unidade,Estoque,Desceu,Linha Montagem,Sobrou,Posição Final,Status\n';
             
@@ -25,7 +25,7 @@ const RelatorioMobile = {
             return csv;
         };
 
-        // CSS otimizado para mobile
+        // CSS otimizado para mobile e impressão
         const estilo = `
             <style>
                 * { 
@@ -39,17 +39,28 @@ const RelatorioMobile = {
                     background: white;
                     font-size: ${isMobile ? '14px' : '16px'};
                     line-height: 1.4;
+                    color: #2c3e50;
                 }
                 .container { 
                     max-width: 100%; 
                     overflow-x: hidden; 
                 }
+                .header {
+                    text-align: center;
+                    margin-bottom: 20px;
+                    padding-bottom: 15px;
+                    border-bottom: 2px solid #3498db;
+                }
                 h1 { 
                     color: #2c3e50; 
                     font-size: ${isMobile ? '20px' : '24px'};
-                    margin: 0 0 15px 0;
-                    text-align: center;
+                    margin: 0 0 10px 0;
                     font-weight: bold;
+                }
+                .subtitle {
+                    color: #7f8c8d;
+                    font-size: ${isMobile ? '14px' : '16px'};
+                    margin: 0;
                 }
                 .info-box {
                     background: #f8f9fa;
@@ -57,6 +68,7 @@ const RelatorioMobile = {
                     border-radius: 8px;
                     margin: 0 0 20px 0;
                     border-left: 4px solid #3498db;
+                    font-size: ${isMobile ? '12px' : '14px'};
                 }
                 .table-container {
                     overflow-x: auto;
@@ -130,16 +142,27 @@ const RelatorioMobile = {
                     font-weight: bold;
                     margin-left: 5px;
                 }
+                .footer {
+                    text-align: center;
+                    margin-top: 30px;
+                    padding-top: 15px;
+                    border-top: 1px solid #bdc3c7;
+                    color: #7f8c8d;
+                    font-size: 12px;
+                }
                 @media (max-width: 480px) {
                     body { padding: 10px; }
                     .btn { min-width: 120px; padding: 12px 15px; }
                     table { font-size: 11px; }
+                    .info-box { font-size: 11px; }
                 }
                 @media print {
                     .botoes, .no-print { display: none !important; }
                     body { padding: 5px; margin: 0; }
                     .table-container { overflow: visible; border: none; }
                     table { min-width: 100%; font-size: 10px; }
+                    .header { border-bottom: 2px solid #000; }
+                    .info-box { border-left: 4px solid #000; }
                 }
             </style>
         `;
@@ -186,21 +209,29 @@ const RelatorioMobile = {
             </head>
             <body>
                 <div class="container">
-                    <h1>📊 La Giovana's Pizzaria</h1>
+                    <div class="header">
+                        <h1>🍕 La Giovana's Pizzaria</h1>
+                        <p class="subtitle">Relatório de Contagem de Insumos</p>
+                    </div>
                     
                     <div class="info-box">
                         <strong>Data:</strong> ${Utils.formatarData(contagem.data)}<br>
                         <strong>Responsável:</strong> ${contagem.responsavel}<br>
-                        <strong>Itens:</strong> ${Object.keys(contagem.detalhesContagem).length}
+                        <strong>Total de Itens:</strong> ${Object.keys(contagem.detalhesContagem).length}
                     </div>
 
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Insumo</th><th>Unid.</th><th>Estoque</th>
-                                    <th>Desceu</th><th>Linha</th><th>Sobrou</th>
-                                    <th>Pos. Final</th><th>Status</th>
+                                    <th>Insumo</th>
+                                    <th>Unid.</th>
+                                    <th>Estoque</th>
+                                    <th>Desceu</th>
+                                    <th>Linha</th>
+                                    <th>Sobrou</th>
+                                    <th>Pos. Final</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>${tabela}</tbody>
@@ -212,14 +243,14 @@ const RelatorioMobile = {
                             🖨️ Imprimir
                         </button>
                         <button class="btn btn-csv" onclick="exportarCSV()">
-                            📥 CSV
-                        button>
+                            📥 Exportar CSV
+                        </button>
                         <button class="btn btn-close" onclick="window.close()">
                             ❌ Fechar
                         </button>
                     </div>
 
-                    <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
+                    <div class="footer">
                         Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
                     </div>
                 </div>
@@ -233,7 +264,7 @@ const RelatorioMobile = {
                         
                         const a = document.createElement('a');
                         a.href = url;
-                        a.download = 'relatorio_${Utils.getDataAtual()}.csv';
+                        a.download = 'relatorio_contagem_${Utils.getDataAtual()}.csv';
                         document.body.appendChild(a);
                         a.click();
                         document.body.removeChild(a);
@@ -241,7 +272,7 @@ const RelatorioMobile = {
                         URL.revokeObjectURL(url);
                     }
 
-                    // Fechar com gesto (swipe down)
+                    // Fechar com gesto (swipe down) em dispositivos móveis
                     let startY = 0;
                     document.addEventListener('touchstart', e => {
                         startY = e.touches[0].clientY;
@@ -249,6 +280,13 @@ const RelatorioMobile = {
                     
                     document.addEventListener('touchmove', e => {
                         if (startY && e.touches[0].clientY - startY > 100) {
+                            window.close();
+                        }
+                    });
+
+                    // Fechar com ESC
+                    document.addEventListener('keydown', e => {
+                        if (e.key === 'Escape') {
                             window.close();
                         }
                     });
