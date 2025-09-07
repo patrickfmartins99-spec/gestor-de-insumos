@@ -292,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (salvouContagem && salvouHistorico) {
                 console.log('✅ Contagem salva com sucesso:', novaContagem);
                 
-                // Gerar relatório mobile (SUBSTITUIÇÃO DO PDF)
+                // Gerar relatório mobile
                 Notificacoes.mostrarNotificacao('Contagem salva! Gerando relatório...', 'info');
                 
                 setTimeout(() => {
