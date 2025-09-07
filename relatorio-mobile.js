@@ -213,7 +213,7 @@ const RelatorioMobile = {
                         </button>
                         <button class="btn btn-csv" onclick="exportarCSV()">
                             📥 CSV
-                        </button>
+                        button>
                         <button class="btn btn-close" onclick="window.close()">
                             ❌ Fechar
                         </button>
