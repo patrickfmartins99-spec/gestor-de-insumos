@@ -108,8 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="btn btn-outline-info btn-detalhes" data-id="${contagem.id}">
                             <i class="bi bi-eye"></i>
                         </button>
-                        <button class="btn btn-outline-primary btn-pdf" data-id="${contagem.id}">
-                            <i class="bi bi-file-earmark-pdf"></i>
+                        <button class="btn btn-outline-primary btn-relatorio" data-id="${contagem.id}">
+                            <i class="bi bi-file-text"></i>
                         </button>
                     </div>
                 </td>
@@ -192,6 +192,17 @@ document.addEventListener('DOMContentLoaded', () => {
         modalDetalhes.show();
     };
 
+    // Função para gerar relatório (SUBSTITUIÇÃO DO PDF)
+    const gerarRelatorio = (contagemId) => {
+        const historico = StorageManager.getHistoricoContagens();
+        const contagem = historico.find(c => c.id === contagemId);
+        const insumos = StorageManager.getInsumos();
+        
+        if (contagem) {
+            RelatorioMobile.gerarRelatorio(contagem, insumos);
+        }
+    };
+
     // Função para atualizar contador
     const atualizarContador = (total) => {
         const contador = document.getElementById('contadorHistorico');
@@ -209,24 +220,25 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        document.querySelectorAll('.btn-pdf').forEach(btn => {
+        document.querySelectorAll('.btn-relatorio').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const contagemId = e.currentTarget.dataset.id;
-                const historico = StorageManager.getHistoricoContagens();
-                const contagem = historico.find(c => c.id === contagemId);
-                
-                if (contagem) {
-                    RelatorioPDF.gerarPDF(contagem, 'contagem', `Historico_${contagemId}`);
-                }
+                gerarRelatorio(contagemId);
             });
         });
 
-        document.getElementById('btnGerarPdfHistorico').addEventListener('click', () => {
-            if (contagemSelecionada) {
-                RelatorioPDF.gerarPDF(contagemSelecionada, 'contagem', `Historico_${contagemSelecionada.id}`);
-                modalDetalhes.hide();
-            }
-        });
+        // Atualizar o botão do modal para usar o novo sistema
+        const btnGerarRelatorioModal = document.getElementById('btnGerarPdfHistorico');
+        if (btnGerarRelatorioModal) {
+            btnGerarRelatorioModal.innerHTML = '<i class="bi bi-file-text me-1"></i>Gerar Relatório';
+            btnGerarRelatorioModal.addEventListener('click', () => {
+                if (contagemSelecionada) {
+                    const insumos = StorageManager.getInsumos();
+                    RelatorioMobile.gerarRelatorio(contagemSelecionada, insumos);
+                    modalDetalhes.hide();
+                }
+            });
+        }
     };
 
     // Configurar event listeners principais
