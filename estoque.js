@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('📦 Inicializando página de estoque...');
     
     const tabelaEstoqueBody = document.getElementById('tabelaEstoque');
-    const btnGerarPdfEstoque = document.getElementById('btnGerarPdfEstoque');
+    const btnGerarRelatorioEstoque = document.getElementById('btnGerarRelatorioEstoque');
     const semEstoqueText = document.getElementById('semEstoque');
     const btnAtualizarEstoque = document.getElementById('btnAtualizarEstoque');
     const btnExportarCSV = document.getElementById('btnExportarCSV');
@@ -239,9 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Mostrar loading no botão
-        const originalHTML = btnGerarPdfEstoque.innerHTML;
-        btnGerarPdfEstoque.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Gerando...';
-        btnGerarPdfEstoque.disabled = true;
+        const originalHTML = btnGerarRelatorioEstoque.innerHTML;
+        btnGerarRelatorioEstoque.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Gerando...';
+        btnGerarRelatorioEstoque.disabled = true;
 
         setTimeout(() => {
             try {
@@ -251,8 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 Notificacoes.mostrarNotificacao('Erro ao gerar relatório. Verifique o console.', 'error');
             } finally {
                 // Restaurar botão
-                btnGerarPdfEstoque.innerHTML = originalHTML;
-                btnGerarPdfEstoque.disabled = false;
+                btnGerarRelatorioEstoque.innerHTML = originalHTML;
+                btnGerarRelatorioEstoque.disabled = false;
             }
         }, 500);
     };
@@ -274,8 +274,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Configurar event listeners
     const configurarEventListeners = () => {
-        if (btnGerarPdfEstoque) {
-            btnGerarPdfEstoque.addEventListener('click', gerarRelatorioEstoque);
+        if (btnGerarRelatorioEstoque) {
+            btnGerarRelatorioEstoque.addEventListener('click', gerarRelatorioEstoque);
         }
 
         if (btnAtualizarEstoque) {
