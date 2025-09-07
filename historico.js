@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Atualizar o botão do modal para usar o novo sistema
-        const btnGerarRelatorioModal = document.getElementById('btnGerarPdfHistorico');
+        const btnGerarRelatorioModal = document.getElementById('btnGerarRelatorioHistorico');
         if (btnGerarRelatorioModal) {
             btnGerarRelatorioModal.innerHTML = '<i class="bi bi-file-text me-1"></i>Gerar Relatório';
             btnGerarRelatorioModal.addEventListener('click', () => {
