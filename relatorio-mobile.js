@@ -10,7 +10,20 @@ const RelatorioMobile = {
             return null;
         }
 
-        // Gerar dados CSV para a função interna
+        // Função para formatar números inteligentemente (sem .00 desnecessários)
+        const formatarNumeroInteligente = (numero) => {
+            const num = parseFloat(numero);
+            if (isNaN(num)) return '0';
+            
+            // Se for número inteiro, remove decimais
+            if (num % 1 === 0) {
+                return num.toString();
+            }
+            // Se tiver decimais, mantém 2 casas
+            return num.toFixed(2);
+        };
+
+        // Gerar dados CSV
         const generateCSV = () => {
             let csv = 'Insumo,Unidade,Estoque,Desceu,Linha Montagem,Sobrou,Posição Final,Status\n';
             
@@ -19,13 +32,13 @@ const RelatorioMobile = {
                 const status = dados.sobrou <= CONFIG.estoqueCritico ? 'CRÍTICO' :
                               dados.sobrou <= CONFIG.estoqueBaixo ? 'BAIXO' : 'NORMAL';
                 
-                csv += `"${insumo.nome}","${insumo.unidade}",${dados.estoque},${dados.desceu},${dados.linhaMontagem},${dados.sobrou},${dados.posicaoFinal},${status}\n`;
+                csv += `"${insumo.nome}","${insumo.unidade}",${formatarNumeroInteligente(dados.estoque)},${formatarNumeroInteligente(dados.desceu)},${formatarNumeroInteligente(dados.linhaMontagem)},${formatarNumeroInteligente(dados.sobrou)},${formatarNumeroInteligente(dados.posicaoFinal)},${status}\n`;
             });
 
             return csv;
         };
 
-        // CSS otimizado para mobile
+        // CSS otimizado para mobile com fontes maiores
         const estilo = `
             <style>
                 * { 
@@ -35,10 +48,11 @@ const RelatorioMobile = {
                 body { 
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
                     margin: 0; 
-                    padding: 15px; 
+                    padding: 20px; 
                     background: white;
-                    font-size: ${isMobile ? '14px' : '16px'};
-                    line-height: 1.4;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    color: #2c3e50;
                 }
                 .container { 
                     max-width: 100%; 
@@ -46,73 +60,86 @@ const RelatorioMobile = {
                 }
                 .header {
                     text-align: center;
-                    margin-bottom: 20px;
+                    margin-bottom: 25px;
                     padding-bottom: 15px;
-                    border-bottom: 2px solid #3498db;
+                    border-bottom: 3px solid #e74c3c;
                 }
                 h1 { 
                     color: #2c3e50; 
-                    font-size: ${isMobile ? '20px' : '24px'};
+                    font-size: 24px;
                     margin: 0 0 10px 0;
                     font-weight: bold;
                 }
                 .subtitle {
                     color: #7f8c8d;
-                    font-size: ${isMobile ? '14px' : '16px'};
+                    font-size: 16px;
                     margin: 0;
+                    font-weight: 500;
                 }
                 .info-box {
                     background: #f8f9fa;
-                    padding: 12px;
-                    border-radius: 8px;
-                    margin: 0 0 20px 0;
-                    border-left: 4px solid #3498db;
-                    font-size: ${isMobile ? '12px' : '14px'};
+                    padding: 15px;
+                    border-radius: 10px;
+                    margin: 0 0 25px 0;
+                    border-left: 5px solid #3498db;
+                    font-size: 15px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 }
                 .table-container {
                     overflow-x: auto;
                     -webkit-overflow-scrolling: touch;
-                    margin: 0 0 20px 0;
-                    border: 1px solid #ddd;
-                    border-radius: 8px;
+                    margin: 0 0 25px 0;
+                    border: 2px solid #ddd;
+                    border-radius: 10px;
                 }
                 table {
                     width: 100%;
                     border-collapse: collapse;
-                    min-width: ${isMobile ? '600px' : '100%'};
-                    font-size: ${isMobile ? '12px' : '14px'};
+                    min-width: 700px;
+                    font-size: 15px;
                 }
                 th, td {
-                    padding: ${isMobile ? '8px 6px' : '10px 8px'};
+                    padding: 14px 10px;
                     text-align: left;
-                    border-bottom: 1px solid #eee;
+                    border-bottom: 2px solid #eee;
                 }
                 th {
                     background: #2c3e50;
                     color: white;
                     font-weight: 600;
-                    position: ${isMobile ? 'sticky' : 'static'};
+                    font-size: 15px;
+                    position: sticky;
                     left: 0;
                     white-space: nowrap;
                 }
-                .critico { background: #ff6b6b; color: white; }
-                .baixo { background: #ffeaa7; color: #856404; }
-                .normal { background: #d9ead3; color: #155724; }
+                .critico { 
+                    background: #ff4444 !important; 
+                    color: white !important;
+                    font-weight: bold;
+                }
+                .baixo { 
+                    background: #ffcc00 !important; 
+                    color: #333 !important;
+                    font-weight: bold;
+                }
+                .normal { 
+                    background: #d4edda !important;
+                }
                 .botoes {
                     display: flex;
-                    gap: 10px;
-                    margin: 25px 0 15px 0;
+                    gap: 12px;
+                    margin: 30px 0 20px 0;
                     flex-wrap: wrap;
                     justify-content: center;
                 }
                 .btn {
                     flex: 1;
-                    min-width: 140px;
-                    padding: 15px 20px;
+                    min-width: 160px;
+                    padding: 16px 24px;
                     border: none;
-                    border-radius: 8px;
+                    border-radius: 10px;
                     font-weight: 600;
-                    font-size: 16px;
+                    font-size: 17px;
                     cursor: pointer;
                     transition: all 0.3s ease;
                     text-align: center;
@@ -135,63 +162,86 @@ const RelatorioMobile = {
                 }
                 .status-badge {
                     display: inline-block;
-                    padding: 4px 8px;
-                    border-radius: 12px;
-                    font-size: 11px;
+                    padding: 6px 12px;
+                    border-radius: 15px;
+                    font-size: 13px;
                     font-weight: bold;
-                    margin-left: 5px;
+                    margin-left: 8px;
+                }
+                .destaque {
+                    font-weight: bold;
+                    font-size: 16px;
                 }
                 .footer {
                     text-align: center;
-                    margin-top: 30px;
-                    padding-top: 15px;
-                    border-top: 1px solid #bdc3c7;
+                    margin-top: 35px;
+                    padding-top: 20px;
+                    border-top: 2px solid #bdc3c7;
                     color: #7f8c8d;
-                    font-size: 12px;
+                    font-size: 14px;
                 }
                 @media (max-width: 480px) {
-                    body { padding: 10px; }
-                    .btn { min-width: 120px; padding: 12px 15px; }
-                    table { font-size: 11px; }
-                    .info-box { font-size: 11px; }
+                    body { padding: 15px; font-size: 15px; }
+                    .btn { min-width: 140px; padding: 14px 18px; font-size: 16px; }
+                    table { font-size: 14px; }
+                    th, td { padding: 12px 8px; }
+                    .info-box { font-size: 14px; padding: 12px; }
                 }
                 @media print {
                     .botoes, .no-print { display: none !important; }
-                    body { padding: 5px; margin: 0; }
+                    body { 
+                        padding: 15px; 
+                        margin: 0; 
+                        font-size: 14pt !important;
+                    }
                     .table-container { overflow: visible; border: none; }
-                    table { min-width: 100%; font-size: 10px; }
+                    table { 
+                        min-width: 100%; 
+                        font-size: 12pt !important;
+                    }
+                    th, td {
+                        padding: 10pt 8pt !important;
+                        font-size: 11pt !important;
+                    }
                     .header { border-bottom: 2px solid #000; }
-                    .info-box { border-left: 4px solid #000; }
+                    .info-box { 
+                        border-left: 4px solid #000;
+                        font-size: 12pt !important;
+                    }
+                    .destaque { font-size: 13pt !important; }
                 }
             </style>
         `;
 
-        // Gerar tabela
+        // Gerar tabela com números formatados
         let tabela = '';
         Object.entries(contagem.detalhesContagem).forEach(([insumoId, dados]) => {
             const insumo = insumos.find(i => i.id === insumoId) || { nome: 'Desconhecido', unidade: 'N/A' };
             
             let statusClass = 'normal';
             let statusText = 'NORMAL';
+            let statusIcon = '✅';
             
             if (dados.sobrou <= CONFIG.estoqueCritico) {
                 statusClass = 'critico';
                 statusText = 'CRÍTICO';
+                statusIcon = '🚫';
             } else if (dados.sobrou <= CONFIG.estoqueBaixo) {
                 statusClass = 'baixo';
                 statusText = 'BAIXO';
+                statusIcon = '⚠️';
             }
 
             tabela += `
                 <tr class="${statusClass}">
-                    <td>${insumo.nome}</td>
+                    <td><strong>${insumo.nome}</strong></td>
                     <td>${insumo.unidade}</td>
-                    <td>${dados.estoque}</td>
-                    <td>${dados.desceu}</td>
-                    <td>${dados.linhaMontagem}</td>
-                    <td><strong>${dados.sobrou}</strong></td>
-                    <td><strong>${dados.posicaoFinal}</strong></td>
-                    <td><span class="status-badge">${statusText}</span></td>
+                    <td>${formatarNumeroInteligente(dados.estoque)}</td>
+                    <td>${formatarNumeroInteligente(dados.desceu)}</td>
+                    <td>${formatarNumeroInteligente(dados.linhaMontagem)}</td>
+                    <td class="destaque">${formatarNumeroInteligente(dados.sobrou)}</td>
+                    <td class="destaque">${formatarNumeroInteligente(dados.posicaoFinal)}</td>
+                    <td><span class="status-badge">${statusIcon} ${statusText}</span></td>
                 </tr>
             `;
         });
@@ -214,9 +264,9 @@ const RelatorioMobile = {
                     </div>
                     
                     <div class="info-box">
-                        <strong>Data:</strong> ${Utils.formatarData(contagem.data)}<br>
-                        <strong>Responsável:</strong> ${contagem.responsavel}<br>
-                        <strong>Total de Itens:</strong> ${Object.keys(contagem.detalhesContagem).length}
+                        <strong>📅 Data:</strong> ${Utils.formatarData(contagem.data)}<br>
+                        <strong>👤 Responsável:</strong> ${contagem.responsavel}<br>
+                        <strong>📊 Total de Itens:</strong> ${Object.keys(contagem.detalhesContagem).length}
                     </div>
 
                     <div class="table-container">
